@@ -497,10 +497,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   // Open settings modal
   if (settingsBtn) {
-    settingsBtn.addEventListener('click', () => {
-      const apiKeyValue = document.getElementById('api-key-value');
-      if (apiKeyValue && apiKeyValue.textContent) {
-        settingsApiKey.textContent = apiKeyValue.textContent;
+    settingsBtn.addEventListener('click', async () => {
+      // Fetch fresh API key from server
+      const setupInfo = await fetchSetupInfo();
+      if (setupInfo && setupInfo.apiKey) {
+        settingsApiKey.textContent = setupInfo.apiKey;
       }
       settingsModal.style.display = 'flex';
     });
@@ -540,15 +541,48 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Regenerate API key from settings
   if (settingsRegenerateApiKey) {
     settingsRegenerateApiKey.addEventListener('click', async () => {
-      const newApiKey = await regenerateApiKey();
-      if (newApiKey) {
-        settingsApiKey.textContent = newApiKey;
-        // Update all config snippets with new key
-        const configElements = document.querySelectorAll('pre[id$="-config"]');
-        configElements.forEach(element => {
-          const currentContent = element.textContent;
-          element.textContent = currentContent.replace(/"Authorization":\s*"Bearer [^"]+"/, `"Authorization": "Bearer ${newApiKey}"`);
+      const originalText = settingsRegenerateApiKey.textContent;
+      settingsRegenerateApiKey.textContent = 'Regenerating...';
+      settingsRegenerateApiKey.disabled = true;
+      
+      try {
+        const serverUrl = getCurrentServerUrl();
+        const response = await fetch(`${serverUrl}/api/regenerate-api-key`, {
+          method: 'POST'
         });
+        const data = await response.json();
+        
+        if (data.ok) {
+          // Update settings modal API key display
+          settingsApiKey.textContent = data.apiKey;
+          
+          // Update hidden api-key-value element for auto-detection
+          const apiKeyValue = document.getElementById('api-key-value');
+          if (apiKeyValue) {
+            apiKeyValue.textContent = data.apiKey;
+          }
+          
+          // Update all config snippets with new key
+          const configElements = document.querySelectorAll('pre[id$="-config"]');
+          configElements.forEach(element => {
+            const currentContent = element.textContent;
+            if (currentContent.includes('${MEMORYLOOM_API_KEY}')) {
+              element.textContent = currentContent.replace('${MEMORYLOOM_API_KEY}', data.apiKey);
+            } else {
+              element.textContent = currentContent.replace(/"Authorization":\s*"Bearer [^"]+"/, `"Authorization": "Bearer ${data.apiKey}"`);
+            }
+          });
+          
+          alert('API key regenerated successfully. Your MCP configurations have been updated.');
+        } else {
+          throw new Error(data.error || 'Failed to regenerate API key');
+        }
+      } catch (error) {
+        console.error('Failed to regenerate API key:', error);
+        alert('Failed to regenerate API key. Please try again.');
+      } finally {
+        settingsRegenerateApiKey.textContent = originalText;
+        settingsRegenerateApiKey.disabled = false;
       }
     });
   }

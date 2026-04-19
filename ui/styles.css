@@ -98,13 +98,13 @@ body {
   align-items: center;
   gap: 10px;
   font-family: "Space Grotesk", sans-serif;
-  font-size: 0.95rem;
+  font-size: 1rem;
   letter-spacing: 0.04em;
 }
 
 .brand-logo {
-  width: 28px;
-  height: 28px;
+  width: 1rem;
+  height: 1rem;
   border-radius: 6px;
   box-shadow: 0 2px 8px rgba(53, 215, 189, 0.2);
 }
