@@ -36,30 +36,15 @@
           <span class="status-text">Checking...</span>
         </div>
         <nav>
-          <a href="#setup">Setup</a>
-          <a href="#tools">API Tools</a>
-          <a href="#health">Health</a>
+          <button id="settings-btn" class="settings-icon" aria-label="Open Settings">⚙️</button>
         </nav>
       </div>
     </header>
 
     <main>
       <section class="hero reveal">
-        <div id="api-key-display" style="display: none;">
-          <h3>🔑 Your API Key</h3>
-          <div class="api-key-container">
-            <code id="api-key-value"></code>
-            <button class="btn primary" id="copy-api-key" aria-label="Copy API key to clipboard">Copy</button>
-            <button class="btn ghost" id="regenerate-api-key" aria-label="Regenerate API key">Regenerate</button>
-          </div>
-          <p class="api-key-note">
-            ⚠️ Keep this key secret. Your config auto-detects both the MCP URL and API key. No manual replacement needed.
-          </p>
-        </div>
-        
         <div class="hero-actions">
           <a class="btn primary" href="#setup">Connect Editor</a>
-          <a class="btn ghost" href="#tools">View API</a>
         </div>
       </section>
 
@@ -516,6 +501,32 @@
       <p>MemoryLoom Server</p>
       <p>Persistent AI memory is now active at <span id="footer-url"></span></p>
     </footer>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>⚙️ Settings</h2>
+          <button class="modal-close" id="close-settings" aria-label="Close Settings">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="settings-section">
+            <h3>🔑 API Key Management</h3>
+            <div class="api-key-display">
+              <label>Current API Key:</label>
+              <div class="api-key-container">
+                <code id="settings-api-key"></code>
+                <button class="btn primary" id="settings-copy-api-key" aria-label="Copy API key to clipboard">Copy</button>
+              </div>
+            </div>
+            <div class="regenerate-section">
+              <p class="warning">⚠️ Regenerating your API key will invalidate all existing configurations. You'll need to update your editor configs with the new key.</p>
+              <button class="btn danger" id="settings-regenerate-api-key" aria-label="Regenerate API key">Regenerate API Key</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script src="/app.js"></script>
   </body>

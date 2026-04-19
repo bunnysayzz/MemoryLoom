@@ -483,39 +483,80 @@ function initializeRevealAnimation() {
 }
 
 // Initialize everything when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-  updateServerUrls();
-  displayApiKey();
+document.addEventListener('DOMContentLoaded', async () => {
+  await displayApiKey();
+  checkServerHealth();
+  
+  // Settings modal functionality
+  const settingsBtn = document.getElementById('settings-btn');
+  const settingsModal = document.getElementById('settings-modal');
+  const closeSettings = document.getElementById('close-settings');
+  const settingsCopyApiKey = document.getElementById('settings-copy-api-key');
+  const settingsRegenerateApiKey = document.getElementById('settings-regenerate-api-key');
+  const settingsApiKey = document.getElementById('settings-api-key');
+  
+  // Open settings modal
+  if (settingsBtn) {
+    settingsBtn.addEventListener('click', () => {
+      const apiKeyValue = document.getElementById('api-key-value');
+      if (apiKeyValue && apiKeyValue.textContent) {
+        settingsApiKey.textContent = apiKeyValue.textContent;
+      }
+      settingsModal.style.display = 'flex';
+    });
+  }
+  
+  // Close settings modal
+  if (closeSettings) {
+    closeSettings.addEventListener('click', () => {
+      settingsModal.style.display = 'none';
+    });
+  }
+  
+  // Close modal when clicking outside
+  if (settingsModal) {
+    settingsModal.addEventListener('click', (e) => {
+      if (e.target === settingsModal) {
+        settingsModal.style.display = 'none';
+      }
+    });
+  }
+  
+  // Copy API key from settings
+  if (settingsCopyApiKey) {
+    settingsCopyApiKey.addEventListener('click', () => {
+      if (settingsApiKey.textContent) {
+        navigator.clipboard.writeText(settingsApiKey.textContent).then(() => {
+          const originalText = settingsCopyApiKey.textContent;
+          settingsCopyApiKey.textContent = 'Copied!';
+          setTimeout(() => {
+            settingsCopyApiKey.textContent = originalText;
+          }, 2000);
+        });
+      }
+    });
+  }
+  
+  // Regenerate API key from settings
+  if (settingsRegenerateApiKey) {
+    settingsRegenerateApiKey.addEventListener('click', async () => {
+      const newApiKey = await regenerateApiKey();
+      if (newApiKey) {
+        settingsApiKey.textContent = newApiKey;
+        // Update all config snippets with new key
+        const configElements = document.querySelectorAll('pre[id$="-config"]');
+        configElements.forEach(element => {
+          const currentContent = element.textContent;
+          element.textContent = currentContent.replace(/"Authorization":\s*"Bearer [^"]+"/, `"Authorization": "Bearer ${newApiKey}"`);
+        });
+      }
+    });
+  }
+  
   initializeCopyButtons();
   initializeTabs();
   initializeSmoothScrolling();
   initializeRevealAnimation();
-  checkServerHealth();
-  
-  // Initialize copy API key button
-  document.getElementById('copy-api-key')?.addEventListener('click', function() {
-    const apiKey = document.getElementById('api-key-value').textContent;
-    navigator.clipboard.writeText(apiKey).then(() => {
-      this.textContent = 'Copied!';
-      setTimeout(() => {
-        this.textContent = 'Copy';
-      }, 2000);
-    }).catch(err => {
-      console.error('Failed to copy API key:', err);
-    });
-  });
-  
-  // Initialize regenerate API key button
-  document.getElementById('regenerate-api-key')?.addEventListener('click', async function() {
-    const originalText = this.textContent;
-    this.textContent = 'Regenerating...';
-    this.disabled = true;
-    
-    await regenerateApiKey();
-    
-    this.textContent = originalText;
-    this.disabled = false;
-  });
   
   // Initialize download buttons
   document.getElementById('download-claude')?.addEventListener('click', () => downloadConfig('claude'));
