@@ -35,6 +35,10 @@
     "MEMORYLOOM_MAX_TOOL_CALLS_PER_MINUTE": {
       "description": "Optional global per-minute tool call limit (0 disables)",
       "value": "0"
+    },
+    "MEMORYLOOM_WEB_UI": {
+      "description": "Enable web UI for setup and configuration",
+      "value": "true"
     }
   }
 }

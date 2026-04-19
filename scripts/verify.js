@@ -43,6 +43,16 @@ function readMessage(buffer) {
   return { message: JSON.parse(body), remaining };
 }
 
+function parseToolResult(response) {
+  if (response.error) {
+    throw new Error(response.error.message || 'Tool call failed');
+  }
+  if (!response.result || !response.result.content || !response.result.content[0]) {
+    throw new Error('Invalid tool response format');
+  }
+  return JSON.parse(response.result.content[0].text);
+}
+
 function createMcpClient(extraEnv = {}) {
   const client = spawn("node", ["server.js"], {
     cwd: rootDir,

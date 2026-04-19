@@ -23,6 +23,14 @@ const UI_ASSETS = {
   "/assets/memoryloom.png": { file: "assets/memoryloom.png", contentType: "image/png" }
 };
 
+const VALID_LOG_LEVELS = new Set(["debug", "info", "warn", "error"]);
+const LOG_PRIORITIES = {
+  debug: 10,
+  info: 20,
+  warn: 30,
+  error: 40
+};
+
 function getOrCreateApiKey(dataDir) {
   const apiKeyFile = path.join(dataDir, API_KEY_FILE);
   
@@ -79,13 +87,6 @@ CONFIG.backupDir = path.join(CONFIG.dataDir, "backups");
 CONFIG.apiKey = getOrCreateApiKey(CONFIG.dataDir);
 
 const EMBEDDING_DIMENSION = 64;
-const VALID_LOG_LEVELS = new Set(["debug", "info", "warn", "error"]);
-const LOG_PRIORITIES = {
-  debug: 10,
-  info: 20,
-  warn: 30,
-  error: 40
-};
 
 if (!VALID_LOG_LEVELS.has(CONFIG.logLevel)) {
   CONFIG.logLevel = "info";
@@ -1226,6 +1227,29 @@ if (CONFIG.healthPort > 0) {
       });
       res.end();
       return;
+    }
+    
+    // Serve UI assets if web UI is enabled
+    if (CONFIG.webUiEnabled) {
+      const asset = UI_ASSETS[route];
+      if (asset) {
+        const assetPath = path.join(UI_DIR, asset.file);
+        if (fs.existsSync(assetPath)) {
+          try {
+            const body = fs.readFileSync(assetPath);
+            res.writeHead(200, {
+              "Content-Type": asset.contentType,
+              "Cache-Control": route === "/" ? "no-cache" : "public, max-age=3600"
+            });
+            res.end(body);
+            return;
+          } catch (error) {
+            writeLog("error", "web_ui_serve_failure", {
+              details: error instanceof Error ? error.message : "web ui read error"
+            });
+          }
+        }
+      }
     }
     
     if (route === "/health" || route === "/ready") {
