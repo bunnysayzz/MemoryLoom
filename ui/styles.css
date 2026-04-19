@@ -96,18 +96,24 @@ body {
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   font-family: "Space Grotesk", sans-serif;
-  font-size: 16px;
   letter-spacing: 0.04em;
 }
 
+.brand h1 {
+  font-size: 16px;
+  margin: 0;
+  line-height: 1;
+}
+
 .brand-logo {
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
   box-shadow: 0 2px 8px rgba(53, 215, 189, 0.2);
   flex-shrink: 0;
+  object-fit: contain;
 }
 
 .status-indicator {
@@ -752,18 +758,25 @@ h3 {
 
 /* Settings Icon */
 .settings-icon {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
+  background: var(--aqua);
+  border: 1px solid var(--aqua);
+  font-size: 0.85rem;
+  font-weight: 600;
   cursor: pointer;
-  padding: 8px;
-  border-radius: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
   transition: all 0.3s ease;
+  color: var(--bg);
+  font-family: "Outfit", sans-serif;
+  display: inline-block;
+  white-space: nowrap;
+  position: relative;
+  z-index: 101;
 }
 
 .settings-icon:hover {
-  background: var(--card);
-  transform: rotate(90deg);
+  background: #2dd4bf;
+  border-color: #2dd4bf;
 }
 
 /* Modal Styles */
