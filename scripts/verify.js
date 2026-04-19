@@ -113,7 +113,8 @@ const child = spawn("node", ["server.js"], {
   cwd: rootDir,
   env: {
     ...process.env,
-    MEMORYLOOM_DATA_DIR: tempDir
+    MEMORYLOOM_DATA_DIR: tempDir,
+    MEMORYLOOM_API_KEY: ""
   },
   stdio: ["pipe", "pipe", "inherit"]
 });

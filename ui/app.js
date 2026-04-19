@@ -29,25 +29,33 @@ function copyToClipboard(elementId, button) {
 
   let text = element.textContent || element.innerText;
   
-  // Replace placeholder with actual API key
+  // Replace placeholders with actual values
   const apiKeyElement = document.getElementById('api-key-value');
   if (apiKeyElement && apiKeyElement.textContent) {
     text = text.replace('${MEMORYLOOM_API_KEY}', apiKeyElement.textContent);
   }
   
-  navigator.clipboard.writeText(text).then(() => {
-    // Show feedback
-    if (button) {
-      const originalText = button.textContent;
-      button.textContent = 'Copied!';
-      button.style.background = '#35d7bd';
-      setTimeout(() => {
-        button.textContent = originalText;
-        button.style.background = '';
-      }, 2000);
+  // Replace MCP URL placeholder if it still exists
+  // (it should already be replaced by displayApiKey, but just in case)
+  fetchSetupInfo().then(setupInfo => {
+    if (setupInfo && setupInfo.mcpUrl && text.includes('${MCP_URL}')) {
+      text = text.replace('${MCP_URL}', setupInfo.mcpUrl);
     }
-  }).catch(err => {
-    console.error('Failed to copy text: ', err);
+    
+    navigator.clipboard.writeText(text).then(() => {
+      // Show feedback
+      if (button) {
+        const originalText = button.textContent;
+        button.textContent = 'Copied!';
+        button.style.background = '#35d7bd';
+        setTimeout(() => {
+          button.textContent = originalText;
+          button.style.background = '';
+        }, 2000);
+      }
+    }).catch(err => {
+      console.error('Failed to copy text: ', err);
+    });
   });
 }
 
@@ -113,14 +121,25 @@ async function displayApiKey() {
       apiKeyElement.style.display = 'block';
     }
     
-    // Replace placeholder in all config snippets with actual API key
-    const configElements = document.querySelectorAll('pre[id$="-config"]');
+    // Replace placeholders in all config snippets with actual values
+    const configElements = document.querySelectorAll('pre[id$="-config"], pre[id="local-setup"]');
     console.log('Found config elements:', configElements.length);
     configElements.forEach(element => {
-      if (element.textContent.includes('${MEMORYLOOM_API_KEY}')) {
-        element.textContent = element.textContent.replace('${MEMORYLOOM_API_KEY}', setupInfo.apiKey);
-        console.log('Replaced placeholder in:', element.id);
+      let updatedText = element.textContent;
+      
+      // Replace MCP URL placeholder
+      if (setupInfo.mcpUrl && updatedText.includes('${MCP_URL}')) {
+        updatedText = updatedText.replace('${MCP_URL}', setupInfo.mcpUrl);
+        console.log('Replaced MCP_URL in:', element.id);
       }
+      
+      // Replace API key placeholder
+      if (updatedText.includes('${MEMORYLOOM_API_KEY}')) {
+        updatedText = updatedText.replace('${MEMORYLOOM_API_KEY}', setupInfo.apiKey);
+        console.log('Replaced API_KEY in:', element.id);
+      }
+      
+      element.textContent = updatedText;
     });
   } else {
     console.log('No setup info or API key available');
@@ -152,7 +171,7 @@ async function regenerateApiKey() {
           element.textContent = currentContent.replace('${MEMORYLOOM_API_KEY}', data.apiKey);
         } else {
           // Replace any existing API key value (looks for the pattern in the config)
-          element.textContent = currentContent.replace(/"MEMORYLOOM_API_KEY":\s*"[^"]+"/, `"MEMORYLOOM_API_KEY": "${data.apiKey}"`);
+          element.textContent = currentContent.replace(/"Authorization":\s*"Bearer [^"]+"/, `"Authorization": "Bearer ${data.apiKey}"`);
         }
       });
       
@@ -178,10 +197,9 @@ function downloadConfig(editor) {
       config = {
         "mcpServers": {
           "memoryloom": {
-            "command": "node",
-            "args": ["/absolute/path/to/memoryloom/server.js"],
-            "env": {
-              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+            "url": "${MCP_URL}",
+            "headers": {
+              "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
             }
           }
         }
@@ -192,10 +210,9 @@ function downloadConfig(editor) {
       config = {
         "context_servers": {
           "memoryloom": {
-            "command": "node",
-            "args": ["/absolute/path/to/memoryloom/server.js"],
-            "env": {
-              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+            "url": "${MCP_URL}",
+            "headers": {
+              "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
             }
           }
         }
@@ -206,10 +223,9 @@ function downloadConfig(editor) {
       config = {
         "github.copilot.mcp.servers": {
           "memoryloom": {
-            "command": "node",
-            "args": ["/absolute/path/to/memoryloom/server.js"],
-            "env": {
-              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+            "url": "${MCP_URL}",
+            "headers": {
+              "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
             }
           }
         }
@@ -220,10 +236,9 @@ function downloadConfig(editor) {
       config = {
         "mcpServers": {
           "memoryloom": {
-            "command": "node",
-            "args": ["/absolute/path/to/memoryloom/server.js"],
-            "env": {
-              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+            "url": "${MCP_URL}",
+            "headers": {
+              "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
             }
           }
         }
@@ -232,12 +247,11 @@ function downloadConfig(editor) {
       break;
     case 'zed':
       config = {
-        "lsp": {
+        "mcpServers": {
           "memoryloom": {
-            "command": "node",
-            "args": ["/absolute/path/to/memoryloom/server.js"],
-            "env": {
-              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+            "url": "${MCP_URL}",
+            "headers": {
+              "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
             }
           }
         }
@@ -248,10 +262,9 @@ function downloadConfig(editor) {
       config = {
         "mcpServers": {
           "memoryloom": {
-            "command": "node",
-            "args": ["/absolute/path/to/memoryloom/server.js"],
-            "env": {
-              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+            "url": "${MCP_URL}",
+            "headers": {
+              "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
             }
           }
         }
@@ -262,10 +275,9 @@ function downloadConfig(editor) {
       config = {
         "mcpServers": {
           "memoryloom": {
-            "command": "node",
-            "args": ["/absolute/path/to/memoryloom/server.js"],
-            "env": {
-              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+            "url": "${MCP_URL}",
+            "headers": {
+              "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
             }
           }
         }
@@ -276,10 +288,9 @@ function downloadConfig(editor) {
       config = {
         "mcpServers": {
           "memoryloom": {
-            "command": "node",
-            "args": ["/absolute/path/to/memoryloom/server.js"],
-            "env": {
-              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+            "url": "${MCP_URL}",
+            "headers": {
+              "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
             }
           }
         }
@@ -290,10 +301,9 @@ function downloadConfig(editor) {
       config = {
         "mcpServers": {
           "memoryloom": {
-            "command": "node",
-            "args": ["/absolute/path/to/memoryloom/server.js"],
-            "env": {
-              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+            "url": "${MCP_URL}",
+            "headers": {
+              "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
             }
           }
         }
@@ -304,10 +314,9 @@ function downloadConfig(editor) {
       config = {
         "mcpServers": {
           "memoryloom": {
-            "command": "node",
-            "args": ["/absolute/path/to/memoryloom/server.js"],
-            "env": {
-              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+            "url": "${MCP_URL}",
+            "headers": {
+              "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
             }
           }
         }
@@ -318,10 +327,9 @@ function downloadConfig(editor) {
       config = {
         "mcpServers": {
           "memoryloom": {
-            "command": "node",
-            "args": ["/absolute/path/to/memoryloom/server.js"],
-            "env": {
-              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+            "url": "${MCP_URL}",
+            "headers": {
+              "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
             }
           }
         }
@@ -332,10 +340,9 @@ function downloadConfig(editor) {
       config = {
         "mcpServers": {
           "memoryloom": {
-            "command": "node",
-            "args": ["/absolute/path/to/memoryloom/server.js"],
-            "env": {
-              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+            "url": "${MCP_URL}",
+            "headers": {
+              "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
             }
           }
         }
@@ -346,10 +353,9 @@ function downloadConfig(editor) {
       config = {
         "mcpServers": {
           "memoryloom": {
-            "command": "node",
-            "args": ["/absolute/path/to/memoryloom/server.js"],
-            "env": {
-              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+            "url": "${MCP_URL}",
+            "headers": {
+              "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
             }
           }
         }
@@ -358,20 +364,28 @@ function downloadConfig(editor) {
       break;
   }
   
-  // Replace placeholder with actual API key
+  // Replace placeholders with actual values
   const apiKeyElement = document.getElementById('api-key-value');
   if (apiKeyElement && apiKeyElement.textContent) {
     const configString = JSON.stringify(config, null, 2);
-    const configWithKey = configString.replace('${MEMORYLOOM_API_KEY}', apiKeyElement.textContent);
-    const blob = new Blob([configWithKey], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    let configWithValues = configString.replace('${MEMORYLOOM_API_KEY}', apiKeyElement.textContent);
+    
+    // Replace MCP URL placeholder
+    fetchSetupInfo().then(setupInfo => {
+      if (setupInfo && setupInfo.mcpUrl) {
+        configWithValues = configWithValues.replace('${MCP_URL}', setupInfo.mcpUrl);
+      }
+      
+      const blob = new Blob([configWithValues], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
   } else {
     // Fallback to original behavior if no API key available
     const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });

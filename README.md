@@ -7,9 +7,9 @@ MemoryLoom is an MCP-compatible memory server for editors, IDEs, and AI clients.
 
 ## 🚀 One-Click Deploy
 
-### 🆓 Truly Free (No Credit Card Required)
-
-**[📖 No Credit Card Deployment Guide](NO_CREDIT_CARD_DEPLOY.md)** - Detailed instructions for Railway & Fly.io
+MemoryLoom supports **two connection modes**:
+- **stdio MCP** (Local only) - Traditional MCP over stdin/stdout for local development
+- **HTTP MCP** (Local or Remote) - MCP over HTTP for remote deployments
 
 [![Deploy to Railway](https://img.shields.io/badge/Deploy-Railway-0B0D0E?logo=railway&logoColor=white)](https://railway.app/new/template?template=https://github.com/bunnysayzz/memoryloom)
 [![Deploy to Fly.io](https://img.shields.io/badge/Deploy-Fly.io-8B5CF6?logo=flydotio&logoColor=white)](https://fly.io/docs/launch/deploy/)
@@ -28,7 +28,10 @@ MemoryLoom is an MCP-compatible memory server for editors, IDEs, and AI clients.
 [![Deploy to Google Cloud](https://img.shields.io/badge/Deploy-Google%20Cloud-4285F4?logo=googlecloud&logoColor=white)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/bunnysayzz/memoryloom)
 [![Deploy to Azure](https://img.shields.io/badge/Deploy-Azure-0078D4?logo=microsoftazure&logoColor=white)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fbunnysayzz%2Fmemoryloom%2Fmain%2Fazure-deploy.json)
 
-**💡 Recommendation:** Start with **Railway** or **Fly.io** for truly free deployment without credit card. For full MCP support, avoid serverless platforms (Vercel, Netlify).
+**💡 Recommendation:** 
+- **Local development**: Use stdio MCP with `node server.js` 
+- **Remote/Team use**: Deploy to **Railway** or **Fly.io** and use HTTP MCP
+- **Full MCP support**: Avoid serverless platforms (Vercel, Netlify) - they don't support persistent connections
 
 ---
 
@@ -36,6 +39,7 @@ MemoryLoom is an MCP-compatible memory server for editors, IDEs, and AI clients.
 
 **[📑 Complete Documentation Index](DOCUMENTATION_INDEX.md)** - Navigate all documentation
 
+- **[HTTP MCP Connection Guide](HTTP_MCP_GUIDE.md)** - Connect to remote MemoryLoom instances (Heroku, Railway, etc.)
 - **[Editor Setup Guide](EDITOR_SETUP.md)** - Step-by-step configuration for Claude Desktop, Cursor, VS Code, Windsurf, and Zed
 - **[Deployment Guide](DEPLOYMENT_GUIDE.md)** - Deploy to 10+ platforms with one-click or manual setup
 - **[No Credit Card Deploy](NO_CREDIT_CARD_DEPLOY.md)** - Deploy to Railway or Fly.io without credit card
@@ -129,18 +133,11 @@ npm start
 
 ## Editor Setup
 
-MemoryLoom works with all major MCP-compatible editors and AI clients:
+MemoryLoom works with all major MCP-compatible editors and AI clients.
 
-- **[Claude Desktop](EDITOR_SETUP.md#claude-desktop)** - Anthropic's native app
-- **[Cursor IDE](EDITOR_SETUP.md#cursor-ide)** - AI-first code editor
-- **[VS Code + GitHub Copilot](EDITOR_SETUP.md#vs-code-with-github-copilot)** - Microsoft's editor with Copilot
-- **[Windsurf IDE](EDITOR_SETUP.md#windsurf-ide)** - Codeium's Cascade AI editor
-- **[Zed Editor](EDITOR_SETUP.md#zed-editor)** - High-performance collaborative editor
+### Connection Modes
 
-**📖 [Complete Editor Setup Guide →](EDITOR_SETUP.md)**
-
-### Quick Configuration Example
-
+**stdio MCP (Local)** - For local development:
 ```json
 {
   "mcpServers": {
@@ -152,7 +149,31 @@ MemoryLoom works with all major MCP-compatible editors and AI clients:
 }
 ```
 
-See [EDITOR_SETUP.md](EDITOR_SETUP.md) for detailed instructions for your specific editor.
+**HTTP MCP (Remote)** - For hosted instances:
+```json
+{
+  "mcpServers": {
+    "memoryloom": {
+      "url": "https://your-app.herokuapp.com/mcp",
+      "headers": {
+        "Authorization": "Bearer your-api-key"
+      }
+    }
+  }
+}
+```
+
+**📖 [Complete HTTP MCP Guide →](HTTP_MCP_GUIDE.md)**
+
+### Supported Editors
+
+- **[Claude Desktop](EDITOR_SETUP.md#claude-desktop)** - Anthropic's native app
+- **[Cursor IDE](EDITOR_SETUP.md#cursor-ide)** - AI-first code editor
+- **[VS Code + GitHub Copilot](EDITOR_SETUP.md#vs-code-with-github-copilot)** - Microsoft's editor with Copilot
+- **[Windsurf IDE](EDITOR_SETUP.md#windsurf-ide)** - Codeium's Cascade AI editor
+- **[Zed Editor](EDITOR_SETUP.md#zed-editor)** - High-performance collaborative editor
+
+**📖 [Complete Editor Setup Guide →](EDITOR_SETUP.md)**
 
 ## Runtime Configuration
 

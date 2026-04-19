@@ -36,8 +36,13 @@ function getOrCreateApiKey(dataDir) {
   const apiKeyFile = path.join(dataDir, API_KEY_FILE);
   
   // Check if API key is set via environment variable
-  if (process.env.MEMORYLOOM_API_KEY) {
-    return normalizeText(process.env.MEMORYLOOM_API_KEY);
+  if (process.env.MEMORYLOOM_API_KEY !== undefined) {
+    const envKey = normalizeText(process.env.MEMORYLOOM_API_KEY);
+    // Empty string means explicitly disable API key
+    if (envKey === "") {
+      return "";
+    }
+    return envKey;
   }
   
   // Try to load from file
@@ -1262,7 +1267,7 @@ if (CONFIG.healthPort > 0) {
     if (req.method === "OPTIONS") {
       res.writeHead(200, {
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, OPTIONS",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, Authorization, X-API-Key"
       });
       res.end();
@@ -1331,6 +1336,11 @@ if (CONFIG.healthPort > 0) {
     // API endpoint to get server info and API key for UI (no auth required for setup)
     if (route === "/api/setup-info") {
       try {
+        // Determine the MCP URL based on the request
+        const protocol = req.headers['x-forwarded-proto'] || req.headers['x-forwarded-protocol'] || 'http';
+        const host = req.headers['x-forwarded-host'] || req.headers.host;
+        const mcpUrl = `${protocol}://${host}/mcp`;
+        
         const payload = {
           ok: true,
           server: SERVER_NAME,
@@ -1338,7 +1348,8 @@ if (CONFIG.healthPort > 0) {
           protocolVersion: PROTOCOL_VERSION,
           storageMode: CONFIG.storageMode,
           apiKey: CONFIG.apiKey,
-          serverUrl: `http://localhost:${CONFIG.healthPort}`
+          serverUrl: `${protocol}://${host}`,
+          mcpUrl: mcpUrl
         };
         res.writeHead(200, {
           "Content-Type": "application/json",
@@ -1360,6 +1371,82 @@ if (CONFIG.healthPort > 0) {
         }));
         return;
       }
+    }
+
+    // HTTP MCP endpoint - allows remote MCP connections
+    if (route === "/mcp" && req.method === "POST") {
+      if (!checkAuth(req, res)) {
+        return;
+      }
+      
+      let body = "";
+      req.on("data", (chunk) => {
+        body += chunk.toString();
+        if (body.length > MAX_BUFFER_SIZE) {
+          res.writeHead(413, {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+          });
+          res.end(JSON.stringify({
+            jsonrpc: "2.0",
+            error: {
+              code: -32000,
+              message: "Request body too large"
+            }
+          }));
+          req.destroy();
+        }
+      });
+      
+      req.on("end", async () => {
+        try {
+          const message = JSON.parse(body);
+          const response = {
+            jsonrpc: "2.0",
+            id: message.id
+          };
+          
+          try {
+            const result = await handleRequest(message);
+            if (result !== null) {
+              response.result = result;
+            }
+          } catch (error) {
+            response.error = {
+              code: -32000,
+              message: error instanceof Error ? error.message : "Unknown server error."
+            };
+          }
+          
+          res.writeHead(200, {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, X-API-Key"
+          });
+          res.end(JSON.stringify(response));
+        } catch (error) {
+          res.writeHead(400, {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+          });
+          res.end(JSON.stringify({
+            jsonrpc: "2.0",
+            error: {
+              code: -32700,
+              message: "Parse error"
+            }
+          }));
+        }
+      });
+      
+      req.on("error", (error) => {
+        writeLog("error", "mcp_request_error", {
+          details: error instanceof Error ? error.message : "request error"
+        });
+      });
+      
+      return;
     }
 
     if (route === "/api/regenerate-api-key" && req.method === "POST") {

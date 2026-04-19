@@ -53,7 +53,7 @@
             <button class="btn ghost" id="regenerate-api-key" aria-label="Regenerate API key">Regenerate</button>
           </div>
           <p class="api-key-note">
-            ⚠️ Keep this key secret. Your config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects this key from your environment.
+            ⚠️ Keep this key secret. Your config auto-detects both the MCP URL and API key. No manual replacement needed.
           </p>
         </div>
         
@@ -80,7 +80,7 @@
             <button class="tab-btn" data-tab="replit" aria-label="Show Replit setup instructions">Replit</button>
             <button class="tab-btn" data-tab="cline" aria-label="Show Cline setup instructions">Cline</button>
             <button class="tab-btn" data-tab="roocode" aria-label="Show Roo Code setup instructions">Roo Code</button>
-            <button class="tab-btn" data-tab="local" aria-label="Show local setup instructions">Local Setup</button>
+            <button class="tab-btn" data-tab="local" aria-label="Show HTTP MCP setup instructions">HTTP MCP Setup</button>
           </div>
 
           <div class="tab-content active" id="claude-tab">
@@ -94,18 +94,16 @@
               <pre id="claude-config">{
   "mcpServers": {
     "memoryloom": {
-      "command": "node",
-      "args": ["${SERVER_PATH}"],
-      "env": {
-        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
       }
     }
   }
 }</pre>
             </div>
             <p class="note">📍 <strong>Config Location:</strong> <code>~/Library/Application Support/Claude/claude_desktop_config.json</code> (macOS)</p>
-            <p class="note">⚠️ <strong>Important:</strong> MemoryLoom runs as a local stdio server. First run <code>npm start</code> in the MemoryLoom directory.</p>
-            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment. No manual replacement needed.</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config auto-detects both MCP URL and API key. No manual replacement needed.</p>
           </div>
 
           <div class="tab-content" id="cursor-tab">
@@ -119,18 +117,16 @@
               <pre id="cursor-config">{
   "context_servers": {
     "memoryloom": {
-      "command": "node",
-      "args": ["${SERVER_PATH}"],
-      "env": {
-        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
       }
     }
   }
 }</pre>
             </div>
             <p class="note">📍 <strong>Config Location:</strong> Cursor Settings → Extensions → MCP</p>
-            <p class="note">⚠️ <strong>Important:</strong> MemoryLoom runs as a local stdio server. First run <code>npm start</code> in the MemoryLoom directory.</p>
-            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment. No manual replacement needed.</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config auto-detects both MCP URL and API key. No manual replacement needed.</p>
           </div>
 
           <div class="tab-content" id="vscode-tab">
@@ -144,18 +140,16 @@
               <pre id="vscode-config">{
   "github.copilot.mcp.servers": {
     "memoryloom": {
-      "command": "node",
-      "args": ["/absolute/path/to/memoryloom/server.js"],
-      "env": {
-        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
       }
     }
   }
 }</pre>
             </div>
             <p class="note">📍 <strong>Config Location:</strong> VS Code Settings → Extensions → GitHub Copilot</p>
-            <p class="note">⚠️ <strong>Important:</strong> MemoryLoom runs as a local stdio server. First run <code>npm start</code> in the MemoryLoom directory.</p>
-            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment. No manual replacement needed.</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config auto-detects both MCP URL and API key. No manual replacement needed.</p>
           </div>
 
           <div class="tab-content" id="windsurf-tab">
@@ -169,17 +163,16 @@
               <pre id="windsurf-config">{
   "mcpServers": {
     "memoryloom": {
-      "command": "node",
-      "args": ["/absolute/path/to/memoryloom/server.js"],
-      "env": {
-        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
       }
     }
   }
 }</pre>
             </div>
             <p class="note">📍 <strong>Config Location:</strong> Windsurf Settings → MCP Servers</p>
-            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment.</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config auto-detects both MCP URL and API key. No manual replacement needed.</p>
           </div>
 
           <div class="tab-content" id="zed-tab">
@@ -191,19 +184,18 @@
                 <button id="download-zed" class="btn ghost" aria-label="Download Zed configuration file">Download</button>
               </div>
               <pre id="zed-config">{
-  "lsp": {
+  "mcpServers": {
     "memoryloom": {
-      "command": "node",
-      "args": ["/absolute/path/to/memoryloom/server.js"],
-      "env": {
-        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
       }
     }
   }
 }</pre>
             </div>
             <p class="note">📍 <strong>Config Location:</strong> Zed Settings → LSP → Add Server</p>
-            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment.</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config auto-detects both MCP URL and API key. No manual replacement needed.</p>
           </div>
 
           <div class="tab-content" id="continue-tab">
@@ -217,17 +209,16 @@
               <pre id="continue-config">{
   "mcpServers": {
     "memoryloom": {
-      "command": "node",
-      "args": ["/absolute/path/to/memoryloom/server.js"],
-      "env": {
-        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
       }
     }
   }
 }</pre>
             </div>
             <p class="note">📍 <strong>Config Location:</strong> Continue.dev Settings → MCP Servers</p>
-            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment.</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config auto-detects both MCP URL and API key. No manual replacement needed.</p>
           </div>
 
           <div class="tab-content" id="aider-tab">
@@ -241,17 +232,16 @@
               <pre id="aider-config">{
   "mcpServers": {
     "memoryloom": {
-      "command": "node",
-      "args": ["/absolute/path/to/memoryloom/server.js"],
-      "env": {
-        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
       }
     }
   }
 }</pre>
             </div>
             <p class="note">📍 <strong>Config Location:</strong> Aider config file (.aider.conf.yaml)</p>
-            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment.</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config auto-detects both MCP URL and API key. No manual replacement needed.</p>
           </div>
 
           <div class="tab-content" id="jetbrains-tab">
@@ -265,17 +255,16 @@
               <pre id="jetbrains-config">{
   "mcpServers": {
     "memoryloom": {
-      "command": "node",
-      "args": ["/absolute/path/to/memoryloom/server.js"],
-      "env": {
-        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
       }
     }
   }
 }</pre>
             </div>
             <p class="note">📍 <strong>Config Location:</strong> JetBrains Settings → Tools → MCP Servers</p>
-            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment.</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config auto-detects both MCP URL and API key. No manual replacement needed.</p>
           </div>
 
           <div class="tab-content" id="codeium-tab">
@@ -289,17 +278,16 @@
               <pre id="codeium-config">{
   "mcpServers": {
     "memoryloom": {
-      "command": "node",
-      "args": ["/absolute/path/to/memoryloom/server.js"],
-      "env": {
-        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
       }
     }
   }
 }</pre>
             </div>
             <p class="note">📍 <strong>Config Location:</strong> Codeium Settings → MCP Servers</p>
-            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment.</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config auto-detects both MCP URL and API key. No manual replacement needed.</p>
           </div>
 
           <div class="tab-content" id="tabby-tab">
@@ -313,17 +301,16 @@
               <pre id="tabby-config">{
   "mcpServers": {
     "memoryloom": {
-      "command": "node",
-      "args": ["/absolute/path/to/memoryloom/server.js"],
-      "env": {
-        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
       }
     }
   }
 }</pre>
             </div>
             <p class="note">📍 <strong>Config Location:</strong> Tabby Settings → MCP Servers</p>
-            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment.</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config auto-detects both MCP URL and API key. No manual replacement needed.</p>
           </div>
 
           <div class="tab-content" id="replit-tab">
@@ -337,17 +324,16 @@
               <pre id="replit-config">{
   "mcpServers": {
     "memoryloom": {
-      "command": "node",
-      "args": ["/absolute/path/to/memoryloom/server.js"],
-      "env": {
-        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
       }
     }
   }
 }</pre>
             </div>
             <p class="note">📍 <strong>Config Location:</strong> Replit Settings → Tools → MCP</p>
-            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment.</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config auto-detects both MCP URL and API key. No manual replacement needed.</p>
           </div>
 
           <div class="tab-content" id="cline-tab">
@@ -361,17 +347,16 @@
               <pre id="cline-config">{
   "mcpServers": {
     "memoryloom": {
-      "command": "node",
-      "args": ["/absolute/path/to/memoryloom/server.js"],
-      "env": {
-        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
       }
     }
   }
 }</pre>
             </div>
             <p class="note">📍 <strong>Config Location:</strong> VS Code Settings → Cline → MCP Servers</p>
-            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment.</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config auto-detects both MCP URL and API key. No manual replacement needed.</p>
           </div>
 
           <div class="tab-content" id="roocode-tab">
@@ -385,44 +370,35 @@
               <pre id="roocode-config">{
   "mcpServers": {
     "memoryloom": {
-      "command": "node",
-      "args": ["/absolute/path/to/memoryloom/server.js"],
-      "env": {
-        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
       }
     }
   }
 }</pre>
             </div>
             <p class="note">📍 <strong>Config Location:</strong> Roo Code Settings → MCP Servers</p>
-            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment.</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config auto-detects both MCP URL and API key. No manual replacement needed.</p>
           </div>
 
           <div class="tab-content" id="local-tab">
-            <h3>Local Setup (Recommended)</h3>
-            <p>For best performance, run MemoryLoom locally:</p>
+            <h3>HTTP MCP Setup</h3>
+            <p>MemoryLoom is running and ready to connect via HTTP MCP:</p>
             <div class="code-block">
-              <button class="copy-btn" data-target="local-setup" aria-label="Copy local setup commands to clipboard">Copy</button>
-              <pre id="local-setup"># Clone and setup
-git clone https://github.com/bunnysayzz/memoryloom.git
-cd memoryloom
-npm install
-npm start
-
-# Then use in your editor config:
-{
+              <button class="copy-btn" data-target="local-setup" aria-label="Copy HTTP MCP configuration to clipboard">Copy</button>
+              <pre id="local-setup">{
   "mcpServers": {
     "memoryloom": {
-      "command": "node",
-      "args": ["/absolute/path/to/memoryloom/server.js"],
-      "env": {
-        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
       }
     }
   }
 }</pre>
             </div>
-            <p class="note">💡 <strong>Why Local?</strong> MCP works best with local processes for stdio communication.</p>
+            <p class="note">💡 <strong>HTTP MCP:</strong> Connect directly to this server without running anything locally. Works for all MCP-compatible editors.</p>
           </div>
         </div>
       </section>
