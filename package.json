@@ -13,7 +13,8 @@
   "scripts": {
     "start": "node server.js",
     "setup": "node scripts/setup.js",
-    "verify": "node scripts/verify.js"
+    "verify": "node scripts/verify.js",
+    "test": "node scripts/verify.js"
   },
   "keywords": [
     "mcp",

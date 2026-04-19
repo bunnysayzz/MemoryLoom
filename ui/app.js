@@ -23,14 +23,13 @@ function updateServerUrls() {
 }
 
 // Copy text to clipboard
-function copyToClipboard(elementId) {
+function copyToClipboard(elementId, button) {
   const element = document.getElementById(elementId);
   if (!element) return;
-  
+
   const text = element.textContent || element.innerText;
   navigator.clipboard.writeText(text).then(() => {
     // Show feedback
-    const button = document.querySelector(`[onclick="copyToClipboard('${elementId}')"]`);
     if (button) {
       const originalText = button.textContent;
       button.textContent = 'Copied!';
@@ -42,6 +41,17 @@ function copyToClipboard(elementId) {
     }
   }).catch(err => {
     console.error('Failed to copy text: ', err);
+  });
+}
+
+// Initialize copy button event listeners
+function initializeCopyButtons() {
+  const copyButtons = document.querySelectorAll('.copy-btn');
+  copyButtons.forEach(button => {
+    button.addEventListener('click', (e) => {
+      const targetId = e.target.getAttribute('data-target');
+      copyToClipboard(targetId, e.target);
+    });
   });
 }
 
@@ -68,29 +78,123 @@ function initializeTabs() {
   });
 }
 
+// Fetch setup info including API key
+async function fetchSetupInfo() {
+  const serverUrl = getCurrentServerUrl();
+  try {
+    const response = await fetch(`${serverUrl}/api/setup-info`);
+    const data = await response.json();
+    if (data.ok) {
+      return data;
+    }
+  } catch (error) {
+    console.error('Failed to fetch setup info:', error);
+  }
+  return null;
+}
+
+// Display API key in UI
+async function displayApiKey() {
+  const setupInfo = await fetchSetupInfo();
+  if (setupInfo && setupInfo.apiKey) {
+    const apiKeyElement = document.getElementById('api-key-display');
+    const apiKeyValue = document.getElementById('api-key-value');
+    if (apiKeyValue) {
+      apiKeyValue.textContent = setupInfo.apiKey;
+      apiKeyValue.style.display = 'block';
+    }
+    if (apiKeyElement) {
+      apiKeyElement.style.display = 'block';
+    }
+  }
+}
+
+// Download config file
+function downloadConfig(editor) {
+  const serverUrl = getCurrentServerUrl();
+  const apiKey = document.getElementById('api-key-value')?.textContent || '';
+  
+  let config;
+  let filename;
+  
+  switch(editor) {
+    case 'claude':
+      config = {
+        "mcpServers": {
+          "memoryloom": {
+            "command": "node",
+            "args": ["/absolute/path/to/memoryloom/server.js"],
+            "env": {
+              "MEMORYLOOM_API_KEY": apiKey
+            }
+          }
+        }
+      };
+      filename = 'claude_desktop_config.json';
+      break;
+    case 'cursor':
+      config = {
+        "context_servers": {
+          "memoryloom": {
+            "command": "node",
+            "args": ["/absolute/path/to/memoryloom/server.js"],
+            "env": {
+              "MEMORYLOOM_API_KEY": apiKey
+            }
+          }
+        }
+      };
+      filename = 'cursor_config.json';
+      break;
+    case 'vscode':
+      config = {
+        "github.copilot.mcp.servers": {
+          "memoryloom": {
+            "command": "node",
+            "args": ["/absolute/path/to/memoryloom/server.js"],
+            "env": {
+              "MEMORYLOOM_API_KEY": apiKey
+            }
+          }
+        }
+      };
+      filename = 'vscode_settings.json';
+      break;
+  }
+  
+  const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 // Health check functionality
 async function checkServerHealth() {
   const serverUrl = getCurrentServerUrl();
-  
+  const setupInfo = await fetchSetupInfo();
+
   try {
-    // Check server status
-    const healthResponse = await fetch(`${serverUrl}/health`);
-    const healthData = await healthResponse.json();
+    // Use setup info for health check with auth if API key exists
+    const headers = {};
+    if (setupInfo && setupInfo.apiKey) {
+      headers['X-API-Key'] = setupInfo.apiKey;
+    }
     
+    const healthResponse = await fetch(`${serverUrl}/health`, { headers });
+    const healthData = await healthResponse.json();
+
     if (healthData.ok) {
       updateHealthStatus('server-status', '✅ Online', 'healthy');
       updateHealthStatus('storage-mode', healthData.storage?.mode || 'JSON', 'healthy');
-      
-      // Try to get memory stats
-      try {
-        const statsResponse = await fetch(`${serverUrl}/ready`);
-        const statsData = await statsResponse.json();
-        if (statsData.ok) {
-          updateHealthStatus('memory-count', 'Ready', 'healthy');
-        }
-      } catch (e) {
-        updateHealthStatus('memory-count', 'Unknown', 'warning');
-      }
+
+      // Try to get memory count from storage status
+      const memoryCount = healthData.storage?.count || 0;
+      updateHealthStatus('memory-count', `${memoryCount} memories`, 'healthy');
     } else {
       updateHealthStatus('server-status', '⚠️ Issues', 'warning');
     }
@@ -154,11 +258,28 @@ function initializeRevealAnimation() {
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
   updateServerUrls();
+  displayApiKey();
+  initializeCopyButtons();
   initializeTabs();
   initializeSmoothScrolling();
   initializeRevealAnimation();
   checkServerHealth();
+  
+  // Initialize copy API key button
+  document.getElementById('copy-api-key')?.addEventListener('click', function() {
+    const apiKey = document.getElementById('api-key-value').textContent;
+    navigator.clipboard.writeText(apiKey).then(() => {
+      this.textContent = 'Copied!';
+      setTimeout(() => {
+        this.textContent = 'Copy';
+      }, 2000);
+    }).catch(err => {
+      console.error('Failed to copy API key:', err);
+    });
+  });
+  
+  // Initialize download buttons
+  document.getElementById('download-claude')?.addEventListener('click', () => downloadConfig('claude'));
+  document.getElementById('download-cursor')?.addEventListener('click', () => downloadConfig('cursor'));
+  document.getElementById('download-vscode')?.addEventListener('click', () => downloadConfig('vscode'));
 });
-
-// Make copyToClipboard available globally for onclick handlers
-window.copyToClipboard = copyToClipboard;

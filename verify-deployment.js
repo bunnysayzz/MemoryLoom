@@ -3,13 +3,15 @@
 import { spawn } from 'child_process';
 import http from 'http';
 
+const PORT = process.env.PORT || process.env.MEMORYLOOM_HEALTH_PORT || '3001';
+
 console.log('🚀 MemoryLoom Deployment Verification');
 console.log('=====================================');
 
 // Test 1: Check if server starts
 console.log('\n1. Testing server startup...');
 const server = spawn('node', ['server.js'], {
-  env: { ...process.env, MEMORYLOOM_HEALTH_PORT: '3001' },
+  env: { ...process.env, MEMORYLOOM_HEALTH_PORT: PORT },
   stdio: ['pipe', 'pipe', 'pipe']
 });
 
@@ -28,7 +30,7 @@ setTimeout(() => {
   
   // Test 2: Check health endpoint
   console.log('\n2. Testing health endpoint...');
-  const healthReq = http.request('http://localhost:3001/health', (res) => {
+  const healthReq = http.request(`http://localhost:${PORT}/health`, (res) => {
     let data = '';
     res.on('data', chunk => data += chunk);
     res.on('end', () => {
@@ -46,7 +48,7 @@ setTimeout(() => {
       
       // Test 3: Check web UI
       console.log('\n3. Testing web UI...');
-      const uiReq = http.request('http://localhost:3001/', (res) => {
+      const uiReq = http.request(`http://localhost:${PORT}/`, (res) => {
         let data = '';
         res.on('data', chunk => data += chunk);
         res.on('end', () => {

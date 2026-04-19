@@ -4,72 +4,118 @@ import { spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { mkdtempSync, rmSync } from "node:fs";
 
 const rootDir = process.cwd();
-const dataDir = path.join(rootDir, "data");
+const tempDir = mkdtempSync(path.join(process.env.TMPDIR || "/tmp", "memoryloom-verify-"));
+const dataDir = tempDir;
 const dataFile = path.join(dataDir, "memories.json");
 
 fs.mkdirSync(dataDir, { recursive: true });
 fs.writeFileSync(dataFile, JSON.stringify({ memories: [] }, null, 2));
-
-const child = spawn("node", ["server.js"], {
-  cwd: rootDir,
-  stdio: ["pipe", "pipe", "inherit"]
-});
-
-let buffer = Buffer.alloc(0);
-const responses = new Map();
 
 function encode(message) {
   const body = JSON.stringify(message);
   return `Content-Length: ${Buffer.byteLength(body, "utf8")}\r\n\r\n${body}`;
 }
 
-function readMessage() {
+function readMessage(buffer) {
   const headerEnd = buffer.indexOf("\r\n\r\n");
   if (headerEnd === -1) {
-    return null;
+    return { message: null, remaining: buffer };
   }
 
   const header = buffer.slice(0, headerEnd).toString("utf8");
   const match = header.match(/Content-Length:\s*(\d+)/i);
   if (!match) {
-    return null;
+    return { message: null, remaining: buffer };
   }
 
   const contentLength = Number(match[1]);
   const start = headerEnd + 4;
   const end = start + contentLength;
   if (buffer.length < end) {
-    return null;
+    return { message: null, remaining: buffer };
   }
 
   const body = buffer.slice(start, end).toString("utf8");
-  buffer = buffer.slice(end);
-  return JSON.parse(body);
+  const remaining = buffer.slice(end);
+  return { message: JSON.parse(body), remaining };
 }
 
-function waitFor(id, timeoutMs = 2000) {
-  return new Promise((resolve, reject) => {
-    const start = Date.now();
-    const timer = setInterval(() => {
-      if (responses.has(id)) {
-        clearInterval(timer);
-        resolve(responses.get(id));
-        return;
-      }
-      if (Date.now() - start > timeoutMs) {
-        clearInterval(timer);
-        reject(new Error(`Timed out waiting for response ${id}`));
-      }
-    }, 10);
+function createMcpClient(extraEnv = {}) {
+  const client = spawn("node", ["server.js"], {
+    cwd: rootDir,
+    env: {
+      ...process.env,
+      MEMORYLOOM_DATA_DIR: tempDir,
+      ...extraEnv
+    },
+    stdio: ["pipe", "pipe", "inherit"]
   });
+  let buffer = Buffer.alloc(0);
+  const responses = new Map();
+
+  client.stdout.on("data", (chunk) => {
+    buffer = Buffer.concat([buffer, chunk]);
+    while (true) {
+      const { message, remaining } = readMessage(buffer);
+      buffer = remaining;
+      if (!message) {
+        break;
+      }
+      responses.set(message.id, message);
+    }
+  });
+
+  function send(id, method, params = {}) {
+    client.stdin.write(
+      encode({
+        jsonrpc: "2.0",
+        id,
+        method,
+        params
+      })
+    );
+  }
+
+  function waitFor(id, timeoutMs = 2000) {
+    return new Promise((resolve, reject) => {
+      const start = Date.now();
+      const timer = setInterval(() => {
+        if (responses.has(id)) {
+          clearInterval(timer);
+          resolve(responses.get(id));
+          return;
+        }
+        if (Date.now() - start > timeoutMs) {
+          clearInterval(timer);
+          reject(new Error(`Timed out waiting for response ${id}`));
+        }
+      }, 10);
+    });
+  }
+
+  return { client, send, waitFor };
 }
+
+const child = spawn("node", ["server.js"], {
+  cwd: rootDir,
+  env: {
+    ...process.env,
+    MEMORYLOOM_DATA_DIR: tempDir
+  },
+  stdio: ["pipe", "pipe", "inherit"]
+});
+
+let buffer = Buffer.alloc(0);
+const responses = new Map();
 
 child.stdout.on("data", (chunk) => {
   buffer = Buffer.concat([buffer, chunk]);
   while (true) {
-    const message = readMessage();
+    const { message, remaining } = readMessage(buffer);
+    buffer = remaining;
     if (!message) {
       break;
     }
@@ -88,158 +134,21 @@ function send(id, method, params = {}) {
   );
 }
 
-function parseToolResult(response) {
-  const text = response.result.content[0].text;
-  return JSON.parse(text);
-}
-
-function connectClient() {
-  const client = spawn("node", ["server.js"], {
-    cwd: rootDir,
-    stdio: ["pipe", "pipe", "inherit"]
-  });
-  let localBuffer = Buffer.alloc(0);
-  const localResponses = new Map();
-
-  function readLocalMessage() {
-    const headerEnd = localBuffer.indexOf("\r\n\r\n");
-    if (headerEnd === -1) {
-      return null;
-    }
-
-    const header = localBuffer.slice(0, headerEnd).toString("utf8");
-    const match = header.match(/Content-Length:\s*(\d+)/i);
-    if (!match) {
-      return null;
-    }
-
-    const contentLength = Number(match[1]);
-    const start = headerEnd + 4;
-    const end = start + contentLength;
-    if (localBuffer.length < end) {
-      return null;
-    }
-
-    const body = localBuffer.slice(start, end).toString("utf8");
-    localBuffer = localBuffer.slice(end);
-    return JSON.parse(body);
-  }
-
-  client.stdout.on("data", (chunk) => {
-    localBuffer = Buffer.concat([localBuffer, chunk]);
-    while (true) {
-      const message = readLocalMessage();
-      if (!message) {
-        break;
+function waitFor(id, timeoutMs = 2000) {
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+    const timer = setInterval(() => {
+      if (responses.has(id)) {
+        clearInterval(timer);
+        resolve(responses.get(id));
+        return;
       }
-      localResponses.set(message.id, message);
-    }
-  });
-
-  function sendLocal(id, method, params = {}) {
-    client.stdin.write(
-      encode({
-        jsonrpc: "2.0",
-        id,
-        method,
-        params
-      })
-    );
-  }
-
-  function waitForLocal(id, timeoutMs = 2000) {
-    return new Promise((resolve, reject) => {
-      const start = Date.now();
-      const timer = setInterval(() => {
-        if (localResponses.has(id)) {
-          clearInterval(timer);
-          resolve(localResponses.get(id));
-          return;
-        }
-        if (Date.now() - start > timeoutMs) {
-          clearInterval(timer);
-          reject(new Error(`Timed out waiting for response ${id}`));
-        }
-      }, 10);
-    });
-  }
-
-  return { client, sendLocal, waitForLocal };
-}
-
-function connectClientWithEnv(extraEnv = {}) {
-  const client = spawn("node", ["server.js"], {
-    cwd: rootDir,
-    env: {
-      ...process.env,
-      ...extraEnv
-    },
-    stdio: ["pipe", "pipe", "inherit"]
-  });
-  let localBuffer = Buffer.alloc(0);
-  const localResponses = new Map();
-
-  function readLocalMessage() {
-    const headerEnd = localBuffer.indexOf("\r\n\r\n");
-    if (headerEnd === -1) {
-      return null;
-    }
-    const header = localBuffer.slice(0, headerEnd).toString("utf8");
-    const match = header.match(/Content-Length:\s*(\d+)/i);
-    if (!match) {
-      return null;
-    }
-    const contentLength = Number(match[1]);
-    const start = headerEnd + 4;
-    const end = start + contentLength;
-    if (localBuffer.length < end) {
-      return null;
-    }
-    const body = localBuffer.slice(start, end).toString("utf8");
-    localBuffer = localBuffer.slice(end);
-    return JSON.parse(body);
-  }
-
-  client.stdout.on("data", (chunk) => {
-    localBuffer = Buffer.concat([localBuffer, chunk]);
-    while (true) {
-      const message = readLocalMessage();
-      if (!message) {
-        break;
+      if (Date.now() - start > timeoutMs) {
+        clearInterval(timer);
+        reject(new Error(`Timed out waiting for response ${id}`));
       }
-      localResponses.set(message.id, message);
-    }
+    }, 10);
   });
-
-  function sendLocal(id, method, params = {}) {
-    client.stdin.write(
-      encode({
-        jsonrpc: "2.0",
-        id,
-        method,
-        params
-      })
-    );
-  }
-
-  function waitForLocal(id, timeoutMs = 2000) {
-    return new Promise((resolve, reject) => {
-      const start = Date.now();
-      const timer = setInterval(() => {
-        if (localResponses.has(id)) {
-          clearInterval(timer);
-          resolve(localResponses.get(id));
-          return;
-        }
-        if (Date.now() - start > timeoutMs) {
-          clearInterval(timer);
-          reject(new Error(`Timed out waiting for response ${id}`));
-        }
-      }, 10);
-    });
-  }
-
-  return { client, sendLocal, waitForLocal };
 }
 
 try {
@@ -504,9 +413,9 @@ try {
   };
   fs.writeFileSync(dataFile, JSON.stringify(preservedTimestampData, null, 2));
 
-  const restartSession = connectClient();
-  restartSession.sendLocal(101, "initialize", {});
-  await restartSession.waitForLocal(101);
+  const restartSession = createMcpClient();
+  restartSession.send(101, "initialize", {});
+  await restartSession.waitFor(101);
   restartSession.client.kill();
 
   const postRestartData = JSON.parse(fs.readFileSync(dataFile, "utf8"));
@@ -515,27 +424,27 @@ try {
     throw new Error("Server startup rewrote existing updated_at timestamps.");
   }
 
-  const authSession = connectClientWithEnv({
+  const authSession = createMcpClient({
     MEMORYLOOM_API_KEY: "verify-secret"
   });
-  authSession.sendLocal(201, "initialize", {});
-  await authSession.waitForLocal(201);
-  authSession.sendLocal(202, "tools/call", {
+  authSession.send(201, "initialize", {});
+  await authSession.waitFor(201);
+  authSession.send(202, "tools/call", {
     name: "memory_stats",
     arguments: {}
   });
-  const unauthorizedResponse = await authSession.waitForLocal(202);
+  const unauthorizedResponse = await authSession.waitFor(202);
   if (!unauthorizedResponse.error || !String(unauthorizedResponse.error.message || "").includes("Unauthorized")) {
     throw new Error("API key mode did not reject unauthorized tool calls.");
   }
 
-  authSession.sendLocal(203, "tools/call", {
+  authSession.send(203, "tools/call", {
     name: "memory_stats",
     arguments: {
       api_key: "verify-secret"
     }
   });
-  const authorizedResponse = await authSession.waitForLocal(203);
+  const authorizedResponse = await authSession.waitFor(203);
   if (!authorizedResponse.result) {
     throw new Error("API key mode did not allow authorized tool calls.");
   }
@@ -545,8 +454,10 @@ try {
 
   process.stdout.write("MemoryLoom verification passed.\n");
   child.kill();
+  rmSync(tempDir, { recursive: true, force: true });
 } catch (error) {
   child.kill();
+  rmSync(tempDir, { recursive: true, force: true });
   process.stderr.write(`${error instanceof Error ? error.message : "Verification failed."}\n`);
   process.exit(1);
 }

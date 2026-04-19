@@ -38,7 +38,11 @@ steps:
       - '--port'
       - '8080'
       - '--set-env-vars'
-      - 'MEMORYLOOM_STORAGE_MODE=json,MEMORYLOOM_DATA_DIR=/app/data,MEMORYLOOM_LOG_LEVEL=info,MEMORYLOOM_HEALTH_PORT=8080,MEMORYLOOM_WEB_UI=true'
+      - 'MEMORYLOOM_STORAGE_MODE=json,MEMORYLOOM_DATA_DIR=/mnt/data,MEMORYLOOM_LOG_LEVEL=info,MEMORYLOOM_HEALTH_PORT=8080,MEMORYLOOM_WEB_UI=true'
+      - '--add-volume'
+      - 'name=data,type=,size=10Gi'
+      - '--add-volume-mount'
+      - 'volume=data,mount-path=/mnt/data'
 
 images:
   - 'gcr.io/$PROJECT_ID/memoryloom:$COMMIT_SHA'

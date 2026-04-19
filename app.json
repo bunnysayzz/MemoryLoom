@@ -2,7 +2,6 @@
   "name": "MemoryLoom",
   "description": "MCP memory server with persistent context across sessions",
   "repository": "https://github.com/bunnysayzz/memoryloom",
-  "logo": "https://raw.githubusercontent.com/heroku/node-js-getting-started/main/public/node.svg",
   "keywords": ["mcp", "memory", "ai", "node"],
   "env": {
     "MEMORYLOOM_STORAGE_MODE": {
@@ -27,10 +26,6 @@
     },
     "MEMORYLOOM_POSTGRES_URL": {
       "description": "Postgres connection string (when MEMORYLOOM_STORAGE_MODE=postgres)",
-      "required": false
-    },
-    "MEMORYLOOM_API_KEY": {
-      "description": "Optional API key required for all MCP tool calls",
       "required": false
     },
     "MEMORYLOOM_HEALTH_PORT": {

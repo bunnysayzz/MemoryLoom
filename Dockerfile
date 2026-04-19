@@ -9,7 +9,6 @@ COPY server.js ./
 COPY lib ./lib
 COPY scripts ./scripts
 COPY ui ./ui
-COPY data ./data
 COPY start.sh ./
 
 ENV MEMORYLOOM_STORAGE_MODE=json

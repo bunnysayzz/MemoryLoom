@@ -90,6 +90,23 @@ MemoryLoom is an MCP-compatible memory server for editors, IDEs, and AI clients.
   - `consolidate_memories`
 - Hybrid ranking with token overlap + embedding similarity + metadata weighting
 - Rich memory metadata for filtering and governance
+
+## ⚠️ Embedding Limitations
+
+MemoryLoom uses a **toy-grade character n-gram hashing** implementation for embedding similarity, not a production-grade vector embedding model like OpenAI embeddings or sentence-transformers. This is a lightweight, dependency-free approach suitable for:
+
+- Small to medium memory sets (< 10,000 memories)
+- Simple semantic matching based on character patterns
+- Zero external dependencies and API keys
+- Fast local computation
+
+**Limitations:**
+- Not a true semantic embedding (no word context understanding)
+- Performance degrades with larger memory sets
+- May not capture complex semantic relationships
+- Character-based matching can miss synonyms or related concepts
+
+For production use with large memory sets or advanced semantic understanding, consider integrating a proper vector embedding service (e.g., OpenAI embeddings, sentence-transformers) and a vector database.
 - Pluggable storage:
   - `json` mode (local file-backed)
   - `postgres` mode (database-backed)

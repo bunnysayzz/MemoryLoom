@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import path from "node:path";
-import { randomUUID, timingSafeEqual } from "node:crypto";
+import { randomUUID, timingSafeEqual, createHash } from "node:crypto";
 import process from "node:process";
 import http from "node:http";
 import fs from "node:fs";
@@ -12,12 +12,54 @@ const SERVER_VERSION = "0.5.0";
 const PROTOCOL_VERSION = "2024-11-05";
 const DEFAULT_DATA_DIR = path.join(process.cwd(), "data");
 const UI_DIR = path.join(process.cwd(), "ui");
+const MAX_BUFFER_SIZE = 10 * 1024 * 1024; // 10MB max stdin buffer
+const MAX_CONTENT_LENGTH = 100 * 1024; // 100KB max memory content
+const API_KEY_FILE = ".api_key";
 const UI_ASSETS = {
   "/": { file: "index.html", contentType: "text/html; charset=utf-8" },
   "/index.html": { file: "index.html", contentType: "text/html; charset=utf-8" },
   "/styles.css": { file: "styles.css", contentType: "text/css; charset=utf-8" },
-  "/app.js": { file: "app.js", contentType: "application/javascript; charset=utf-8" }
+  "/app.js": { file: "app.js", contentType: "application/javascript; charset=utf-8" },
+  "/assets/memoryloom.png": { file: "assets/memoryloom.png", contentType: "image/png" }
 };
+
+function getOrCreateApiKey(dataDir) {
+  const apiKeyFile = path.join(dataDir, API_KEY_FILE);
+  
+  // Check if API key is set via environment variable
+  if (process.env.MEMORYLOOM_API_KEY) {
+    return normalizeText(process.env.MEMORYLOOM_API_KEY);
+  }
+  
+  // Try to load from file
+  try {
+    if (fs.existsSync(apiKeyFile)) {
+      const storedKey = fs.readFileSync(apiKeyFile, "utf8").trim();
+      if (storedKey) {
+        return storedKey;
+      }
+    }
+  } catch (e) {
+    writeLog("warn", "Failed to load API key from file", { error: e.message });
+  }
+  
+  // Generate new API key
+  const newApiKey = randomUUID();
+  
+  // Ensure data directory exists
+  try {
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    fs.writeFileSync(apiKeyFile, newApiKey, { mode: 0o600 });
+    writeLog("info", "Generated new API key", { file: apiKeyFile });
+  } catch (e) {
+    writeLog("warn", "Failed to save API key to file", { error: e.message });
+  }
+  
+  return newApiKey;
+}
+
 const CONFIG = {
   storageMode: normalizeText(process.env.MEMORYLOOM_STORAGE_MODE || "json").toLowerCase(),
   dataDir: path.resolve(process.env.MEMORYLOOM_DATA_DIR || DEFAULT_DATA_DIR),
@@ -27,13 +69,14 @@ const CONFIG = {
   backupOnWrite: process.env.MEMORYLOOM_BACKUP_ON_WRITE === "true",
   backupRetention: parseIntegerInRange(process.env.MEMORYLOOM_BACKUP_RETENTION, 1, 1000, 5),
   postgresUrl: normalizeText(process.env.MEMORYLOOM_POSTGRES_URL || process.env.DATABASE_URL),
-  apiKey: normalizeText(process.env.MEMORYLOOM_API_KEY || ""),
+  apiKey: "", // Will be set after dataDir is resolved
   healthPort: parseIntegerInRange(process.env.MEMORYLOOM_HEALTH_PORT || process.env.PORT, 0, 65535, 0),
   maxToolCallsPerMinute: parseIntegerInRange(process.env.MEMORYLOOM_MAX_TOOL_CALLS_PER_MINUTE, 0, 1000000, 0),
   webUiEnabled: process.env.MEMORYLOOM_WEB_UI !== "false"
 };
 CONFIG.dataFile = path.resolve(process.env.MEMORYLOOM_DATA_FILE || path.join(CONFIG.dataDir, "memories.json"));
 CONFIG.backupDir = path.join(CONFIG.dataDir, "backups");
+CONFIG.apiKey = getOrCreateApiKey(CONFIG.dataDir);
 
 const EMBEDDING_DIMENSION = 64;
 const VALID_LOG_LEVELS = new Set(["debug", "info", "warn", "error"]);
@@ -324,6 +367,9 @@ function validateAddMemory(args) {
   if (!content) {
     throw new Error("`content` is required.");
   }
+  if (content.length > MAX_CONTENT_LENGTH) {
+    throw new Error(`Content length ${content.length} exceeds maximum allowed size ${MAX_CONTENT_LENGTH}`);
+  }
 
   return {
     content,
@@ -356,6 +402,10 @@ function buildConflictKey(memoryOrMetadata = {}) {
   return keyParts.join("|");
 }
 
+function hashApiKey(key) {
+  return createHash("sha256").update(key).digest();
+}
+
 function sanitizeToolArguments(args = {}) {
   const copy = { ...args };
   delete copy.api_key;
@@ -368,11 +418,9 @@ function authorizeToolCall(args = {}) {
   }
 
   const token = normalizeText(args.api_key);
-  const tokenBuffer = Buffer.from(token);
-  const expectedBuffer = Buffer.from(CONFIG.apiKey);
-  const valid =
-    tokenBuffer.length === expectedBuffer.length &&
-    timingSafeEqual(tokenBuffer, expectedBuffer);
+  const tokenHash = hashApiKey(token);
+  const expectedHash = hashApiKey(CONFIG.apiKey);
+  const valid = timingSafeEqual(tokenHash, expectedHash);
 
   if (!token || !valid) {
     throw new Error("Unauthorized tool call: invalid or missing api_key.");
@@ -427,6 +475,15 @@ async function writeAndRespond(memories, payload) {
 
 async function migrateMemories() {
   const memories = await store.list();
+  
+  // Quick check: if all memories already have embeddings, skip migration
+  const allHaveEmbeddings = memories.every(
+    (memory) => Array.isArray(memory.embedding) && memory.embedding.length > 0
+  );
+  if (allHaveEmbeddings) {
+    return;
+  }
+  
   const hydrated = memories.map((memory) => hydrateMemory(memory));
   const before = JSON.stringify(memories);
   const after = JSON.stringify(hydrated);
@@ -542,8 +599,12 @@ async function searchMemories(args) {
   const includeArchived = Boolean(args?.include_archived);
 
   const memories = await loadMemories();
+  const searchFilters = { ...filters };
+  if (typeof filters.archived !== "boolean") {
+    searchFilters.archived = includeArchived ? undefined : false;
+  }
   const matches = memories
-    .filter((memory) => matchesFilters(memory, { ...filters, archived: includeArchived ? filters.archived : false }))
+    .filter((memory) => matchesFilters(memory, searchFilters))
     .map((memory) => ({
       ...memory,
       relevance: scoreMemory(memory, query)
@@ -551,12 +612,6 @@ async function searchMemories(args) {
     .filter((memory) => memory.relevance > 0)
     .sort((left, right) => right.relevance - left.relevance)
     .slice(0, limit);
-
-  if (matches.length > 0) {
-    const ids = new Set(matches.map((memory) => memory.id));
-    const touched = memories.map((memory) => (ids.has(memory.id) ? touchMemory(memory) : memory));
-    await replaceMemories(touched);
-  }
 
   return buildTextResult({
     ok: true,
@@ -595,6 +650,9 @@ async function updateMemory(args) {
 
   if (content !== undefined && !content) {
     throw new Error("`content` cannot be empty when provided.");
+  }
+  if (content !== undefined && content.length > MAX_CONTENT_LENGTH) {
+    throw new Error(`Content length ${content.length} exceeds maximum allowed size ${MAX_CONTENT_LENGTH}`);
   }
 
   const memories = await loadMemories();
@@ -1059,6 +1117,9 @@ function processBuffer() {
       }
 
       const contentLength = Number(match[1]);
+      if (contentLength > MAX_BUFFER_SIZE) {
+        throw new Error(`Content-Length ${contentLength} exceeds maximum allowed size ${MAX_BUFFER_SIZE}`);
+      }
       const messageStart = headerEnd + 4;
       const messageEnd = messageStart + contentLength;
 
@@ -1107,6 +1168,14 @@ writeLog("info", "memoryloom_server_started", {
 });
 
 process.stdin.on("data", (chunk) => {
+  if (buffer.length + chunk.length > MAX_BUFFER_SIZE) {
+    writeLog("error", "stdin_buffer_overflow", {
+      currentSize: buffer.length,
+      chunkSize: chunk.length,
+      maxSize: MAX_BUFFER_SIZE
+    });
+    process.exit(1);
+  }
   buffer = Buffer.concat([buffer, chunk]);
   processBuffer();
 });
@@ -1117,12 +1186,52 @@ process.stdin.on("error", (error) => {
   });
 });
 
+function checkAuth(req, res) {
+  const authHeader = req.headers["authorization"] || req.headers["x-api-key"];
+  if (!CONFIG.apiKey) {
+    return true; // No API key configured, allow all requests
+  }
+  if (!authHeader) {
+    res.writeHead(401, {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*"
+    });
+    res.end(JSON.stringify({ ok: false, error: "unauthorized", message: "API key required" }));
+    return false;
+  }
+  const providedKey = authHeader.replace(/^Bearer\s+/i, "").trim();
+  if (providedKey !== CONFIG.apiKey) {
+    res.writeHead(403, {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*"
+    });
+    res.end(JSON.stringify({ ok: false, error: "forbidden", message: "Invalid API key" }));
+    return false;
+  }
+  return true;
+}
+
 let healthServer = null;
 if (CONFIG.healthPort > 0) {
   healthServer = http.createServer(async (req, res) => {
     const url = req.url || "/";
     const route = String(url).split("?")[0] || "/";
+    
+    // Handle CORS preflight
+    if (req.method === "OPTIONS") {
+      res.writeHead(200, {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-API-Key"
+      });
+      res.end();
+      return;
+    }
+    
     if (route === "/health" || route === "/ready") {
+      if (!checkAuth(req, res)) {
+        return;
+      }
       try {
         const status = await store.status();
         const payload = {
@@ -1131,17 +1240,60 @@ if (CONFIG.healthPort > 0) {
           version: SERVER_VERSION,
           storage: status
         };
-        res.writeHead(200, { "Content-Type": "application/json" });
+        res.writeHead(200, {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization, X-API-Key"
+        });
         res.end(JSON.stringify(payload));
         return;
       } catch (error) {
-        res.writeHead(503, { "Content-Type": "application/json" });
-        res.end(
-          JSON.stringify({
-            ok: false,
-            error: error instanceof Error ? error.message : "healthcheck_error"
-          })
-        );
+        res.writeHead(503, {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type"
+        });
+        res.end(JSON.stringify({
+          ok: false,
+          error: "service_unavailable",
+          message: error instanceof Error ? error.message : "healthcheck_error"
+        }));
+        return;
+      }
+    }
+
+    // API endpoint to get server info and API key for UI (no auth required for setup)
+    if (route === "/api/setup-info") {
+      try {
+        const status = await store.status();
+        const payload = {
+          ok: true,
+          server: SERVER_NAME,
+          version: SERVER_VERSION,
+          apiKey: CONFIG.apiKey || null,
+          hasApiKey: !!CONFIG.apiKey,
+          storage: status
+        };
+        res.writeHead(200, {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type"
+        });
+        res.end(JSON.stringify(payload));
+        return;
+      } catch (error) {
+        res.writeHead(500, {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        });
+        res.end(JSON.stringify({
+          ok: false,
+          error: "setup_info_error",
+          message: error instanceof Error ? error.message : "Failed to get setup info"
+        }));
         return;
       }
     }
@@ -1150,7 +1302,12 @@ if (CONFIG.healthPort > 0) {
       return;
     }
 
-    res.writeHead(404, { "Content-Type": "application/json" });
+    res.writeHead(404, {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type"
+    });
     res.end(JSON.stringify({ ok: false, error: "not_found" }));
   });
 

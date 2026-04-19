@@ -15,3 +15,5 @@ services:
         value: "true"
       - key: MEMORYLOOM_BACKUP_RETENTION
         value: "10"
+      - key: MEMORYLOOM_HEALTH_PORT
+        value: "8080"
