@@ -64,6 +64,11 @@
             <button class="tab-btn" data-tab="replit" aria-label="Show Replit setup instructions">Replit</button>
             <button class="tab-btn" data-tab="cline" aria-label="Show Cline setup instructions">Cline</button>
             <button class="tab-btn" data-tab="roocode" aria-label="Show Roo Code setup instructions">Roo Code</button>
+            <button class="tab-btn" data-tab="gemini-vscode" aria-label="Show Gemini Code Assist VS Code setup instructions">Gemini Code Assist</button>
+            <button class="tab-btn" data-tab="claude-cli" aria-label="Show Claude CLI setup instructions">Claude CLI</button>
+            <button class="tab-btn" data-tab="gemini-cli" aria-label="Show Gemini CLI setup instructions">Gemini CLI</button>
+            <button class="tab-btn" data-tab="kiro" aria-label="Show Kiro setup instructions">Kiro</button>
+            <button class="tab-btn" data-tab="antigravity" aria-label="Show Antigravity setup instructions">Antigravity</button>
             <button class="tab-btn" data-tab="local" aria-label="Show HTTP MCP setup instructions">HTTP MCP Setup</button>
           </div>
 
@@ -383,6 +388,106 @@
 }</pre>
             </div>
             <p class="note">💡 <strong>HTTP MCP:</strong> Connect directly to this server without running anything locally. Works for all MCP-compatible editors.</p>
+          </div>
+
+          <div class="tab-content" id="gemini-vscode-tab">
+            <h3>Gemini Code Assist (VS Code) Setup</h3>
+            <p>Add this to your Gemini settings file:</p>
+            <div class="code-block">
+              <button class="copy-btn" data-target="gemini-vscode-config" aria-label="Copy Gemini Code Assist configuration to clipboard">Copy</button>
+              <pre id="gemini-vscode-config">{
+  "mcpServers": {
+    "memoryloom": {
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
+      }
+    }
+  }
+}</pre>
+            </div>
+            <p class="note">📍 <strong>Config Location:</strong> <code>~/.gemini/settings.json</code></p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config auto-detects both MCP URL and API key. No manual replacement needed.</p>
+          </div>
+
+          <div class="tab-content" id="claude-cli-tab">
+            <h3>Claude CLI Setup</h3>
+            <p>Add this to your Claude CLI configuration:</p>
+            <div class="code-block">
+              <button class="copy-btn" data-target="claude-cli-config" aria-label="Copy Claude CLI configuration to clipboard">Copy</button>
+              <pre id="claude-cli-config">{
+  "mcpServers": {
+    "memoryloom": {
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
+      }
+    }
+  }
+}</pre>
+            </div>
+            <p class="note">📍 <strong>Config Location:</strong> <code>~/.claude.json</code> (local scope) or <code>.mcp.json</code> (project scope)</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config auto-detects both MCP URL and API key. No manual replacement needed.</p>
+          </div>
+
+          <div class="tab-content" id="gemini-cli-tab">
+            <h3>Gemini CLI Setup</h3>
+            <p>Add this to your Gemini CLI settings file:</p>
+            <div class="code-block">
+              <button class="copy-btn" data-target="gemini-cli-config" aria-label="Copy Gemini CLI configuration to clipboard">Copy</button>
+              <pre id="gemini-cli-config">{
+  "mcpServers": {
+    "memoryloom": {
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
+      }
+    }
+  }
+}</pre>
+            </div>
+            <p class="note">📍 <strong>Config Location:</strong> <code>~/.gemini/settings.json</code></p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config auto-detects both MCP URL and API key. No manual replacement needed.</p>
+          </div>
+
+          <div class="tab-content" id="kiro-tab">
+            <h3>Kiro Setup</h3>
+            <p>Add this to your Kiro MCP configuration file:</p>
+            <div class="code-block">
+              <button class="copy-btn" data-target="kiro-config" aria-label="Copy Kiro configuration to clipboard">Copy</button>
+              <pre id="kiro-config">{
+  "mcpServers": {
+    "memoryloom": {
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
+      }
+    }
+  }
+}</pre>
+            </div>
+            <p class="note">📍 <strong>Config Location:</strong> <code>~/.kiro/settings/mcp.json</code> (user level) or <code>.kiro/settings/mcp.json</code> (workspace level)</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config auto-detects both MCP URL and API key. No manual replacement needed.</p>
+          </div>
+
+          <div class="tab-content" id="antigravity-tab">
+            <h3>Antigravity Setup</h3>
+            <p>Add this to your Antigravity MCP configuration file:</p>
+            <div class="code-block">
+              <button class="copy-btn" data-target="antigravity-config" aria-label="Copy Antigravity configuration to clipboard">Copy</button>
+              <pre id="antigravity-config">{
+  "mcpServers": {
+    "memoryloom": {
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
+      }
+    }
+  }
+}</pre>
+            </div>
+            <p class="note">📍 <strong>Config Location:</strong> <code>~/.gemini/antigravity/mcp_config.json</code></p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config auto-detects both MCP URL and API key. No manual replacement needed.</p>
           </div>
         </div>
       </section>
