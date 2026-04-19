@@ -1,0 +1,25 @@
+{
+  "name": "memoryloom",
+  "version": "0.5.0",
+  "description": "MemoryLoom MCP memory server with persistent local storage",
+  "type": "module",
+  "main": "server.js",
+  "dependencies": {
+    "pg": "^8.13.1"
+  },
+  "bin": {
+    "memoryloom": "./scripts/setup.js"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "setup": "node scripts/setup.js",
+    "verify": "node scripts/verify.js"
+  },
+  "keywords": [
+    "mcp",
+    "memory",
+    "ai",
+    "server"
+  ],
+  "license": "MIT"
+}

@@ -1,0 +1,527 @@
+MemoryLoom Documentation
+Version 1.0
+
+========================================================================
+1. Introduction
+========================================================================
+
+MemoryLoom is an MCP-native memory platform that gives AI agents durable,
+queryable memory across sessions. It is designed for editors, IDEs, and AI
+clients that support the Model Context Protocol (MCP), and provides a clean
+tool interface for storing and retrieving context in real time.
+
+MemoryLoom enables:
+- Persistent memory across conversations and sessions
+- Structured memory metadata for filtering and governance
+- Hybrid retrieval with lexical and embedding-style relevance
+- Runtime-configurable storage and deployment options
+- Operational visibility through status and statistics tooling
+
+
+========================================================================
+2. Core Concepts
+========================================================================
+
+2.1 Stateless Model, Stateful System
+Language models remain stateless between requests. MemoryLoom externalizes
+long-term context into storage and reconstructs relevant context on demand.
+
+2.2 Tool-Driven Persistence
+MemoryLoom memory is managed through MCP tools. Agents explicitly call tools to:
+- Create memory
+- Query memory
+- Update memory
+- Archive/delete memory
+
+2.3 Retrieval-Driven Context Reconstruction
+MemoryLoom returns relevant records based on query intent and metadata filters.
+Clients inject these records into prompt context before response generation.
+
+
+========================================================================
+3. System Architecture
+========================================================================
+
+MemoryLoom is composed of three layers:
+
+1. MCP Client Layer
+   Any MCP-compatible host (for example Cursor, Claude Desktop, and
+   MCP-enabled editor extensions) discovers and calls MemoryLoom tools.
+
+2. MemoryLoom MCP Server
+   The server handles:
+   - Tool schema publication
+   - Request validation
+   - Memory lifecycle operations
+   - Search ranking and relevance scoring
+   - Runtime status reporting
+
+3. Storage Layer
+   MemoryLoom supports pluggable storage modes:
+   - JSON storage (file-backed local mode)
+   - Postgres storage (database-backed mode)
+
+Storage selection is controlled by environment configuration.
+
+
+========================================================================
+4. Memory Data Model
+========================================================================
+
+Each memory record follows a consistent shape:
+
+{
+  "id": "uuid",
+  "content": "User prefers concise summaries with examples.",
+  "embedding": [ ... numeric vector ... ],
+  "importance": 0.9,
+  "metadata": {
+    "user": "demo-user",
+    "project": "memoryloom",
+    "tags": ["style", "preferences"],
+    "source": "manual",
+    "memory_type": "preference",
+    "confidence": 0.95,
+    "created_at": "2026-04-15T17:31:21.465Z",
+    "updated_at": "2026-04-15T17:31:21.471Z",
+    "last_accessed_at": "2026-04-15T17:31:21.471Z",
+    "archived": false
+  }
+}
+
+Field semantics:
+- id: globally unique record identifier
+- content: canonical text payload for retrieval
+- embedding: vector representation used in relevance scoring
+- importance: priority weight in ranking
+- metadata: governance, filtering, and lifecycle attributes
+
+
+========================================================================
+5. Tool Interface (MCP)
+========================================================================
+
+MemoryLoom exposes the following tools:
+
+5.1 add_memory
+Purpose:
+- Create a new memory record
+
+Input:
+{
+  "content": "string",
+  "importance": 0.0 - 1.0,
+  "metadata": {
+    "user": "string",
+    "project": "string",
+    "source": "string",
+    "memory_type": "string",
+    "confidence": 0.0 - 1.0,
+    "archived": false,
+    "tags": ["string", "string"]
+  }
+}
+
+5.2 search_memories
+Purpose:
+- Retrieve ranked memory candidates for a query
+
+Input:
+{
+  "query": "string",
+  "limit": 5,
+  "include_archived": false,
+  "filters": {
+    "user": "string",
+    "project": "string",
+    "memory_type": "string",
+    "archived": false,
+    "tags": ["string"]
+  }
+}
+
+5.3 get_memories
+Purpose:
+- Fetch exact memory entries by id list
+
+Input:
+{
+  "ids": ["memory-id-1", "memory-id-2"]
+}
+
+5.4 list_memories
+Purpose:
+- Enumerate memories with filter + sort controls
+
+Input:
+{
+  "limit": 20,
+  "sort": "updated_desc",
+  "filters": {
+    "project": "memoryloom",
+    "archived": false
+  }
+}
+
+Sort values:
+- updated_desc
+- updated_asc
+- created_desc
+- created_asc
+
+5.5 update_memory
+Purpose:
+- Update content, importance, and/or metadata of an existing memory
+
+Input:
+{
+  "id": "memory-id",
+  "content": "updated text",
+  "importance": 0.8,
+  "metadata": {
+    "tags": ["updated", "tag"],
+    "confidence": 0.98
+  }
+}
+
+5.6 delete_memory
+Purpose:
+- Archive memory by default; permanently remove when hard_delete=true
+
+Input:
+{
+  "id": "memory-id",
+  "hard_delete": false
+}
+
+5.7 memory_stats
+Purpose:
+- Return aggregate memory counters by state/type/project
+
+Input:
+{}
+
+5.8 server_status
+Purpose:
+- Return runtime configuration and active storage status
+
+Input:
+{}
+
+
+========================================================================
+6. Retrieval and Ranking Model
+========================================================================
+
+MemoryLoom search uses hybrid scoring:
+
+- Token overlap score
+- Embedding similarity score (cosine-style)
+- Importance boost
+- Confidence boost
+- Archived-state penalty
+
+This model balances semantic relevance with policy-aware weighting so results
+remain useful for both natural language and structured memory scenarios.
+
+Ranking pipeline:
+1. Apply metadata filters
+2. Compute relevance score per candidate
+3. Remove low-signal matches
+4. Sort descending by score
+5. Return top N based on limit
+
+
+========================================================================
+7. Storage Modes
+========================================================================
+
+7.1 JSON Mode
+JSON mode is ideal for local development and lightweight deployments.
+
+Characteristics:
+- File-backed memory persistence
+- Atomic write replacement strategy
+- Optional rolling backup snapshots
+- Zero external database requirements
+
+7.2 Postgres Mode
+Postgres mode enables database-backed persistence for larger deployments.
+
+Characteristics:
+- Records stored in relational database table
+- Automatic schema creation on server startup
+- Full-memory transactional replacement for write consistency
+- Runtime selectable via environment configuration
+
+
+========================================================================
+8. Configuration
+========================================================================
+
+Runtime behavior is controlled by environment variables:
+
+- MEMORYLOOM_STORAGE_MODE
+  Values: json | postgres
+
+- MEMORYLOOM_DATA_DIR
+  Base directory for local file storage
+
+- MEMORYLOOM_DATA_FILE
+  Exact JSON memory file path in JSON mode
+
+- MEMORYLOOM_LOG_LEVEL
+  Values: debug | info | warn | error
+
+- MEMORYLOOM_BACKUP_ON_WRITE
+  Values: true | false
+
+- MEMORYLOOM_BACKUP_RETENTION
+  Number of backup files to retain in JSON mode
+
+- MEMORYLOOM_POSTGRES_URL
+  Database connection string for Postgres mode
+  Example: postgres://postgres:postgres@localhost:5432/memoryloom
+
+
+========================================================================
+9. Setup and Run
+========================================================================
+
+9.1 Local Setup
+
+1. Install dependencies
+   npm install
+
+2. Initialize local storage and generate MCP config
+   npm run setup
+
+3. Validate end-to-end behavior
+   npm run verify
+
+4. Start server
+   npm start
+
+9.2 MCP Client Configuration
+
+{
+  "mcpServers": {
+    "memoryloom": {
+      "command": "node",
+      "args": ["/absolute/path/to/memory/server.js"]
+    }
+  }
+}
+
+
+========================================================================
+10. Container Deployment
+========================================================================
+
+10.1 Docker Build and Run
+
+docker build -t memoryloom .
+docker run -i --rm -v "$(pwd)/data:/app/data" memoryloom
+
+10.2 Docker Compose
+
+docker compose up --build
+
+Compose defaults:
+- JSON mode enabled
+- Data directory mounted to ./data
+- Backup retention and logging configured via environment values
+
+
+========================================================================
+11. Operations and Observability
+========================================================================
+
+11.1 Structured Logs
+MemoryLoom emits structured JSON logs to stderr containing:
+- timestamp
+- level
+- message
+- event-specific fields
+
+11.2 Status Tooling
+Use server_status for:
+- Active storage mode inspection
+- Storage target visibility
+- Runtime log level visibility
+- Current memory count
+
+11.3 Statistics Tooling
+Use memory_stats to track:
+- Total records
+- Active vs archived split
+- Memory distribution by project
+- Memory distribution by type
+
+11.4 Backup Strategy (JSON Mode)
+When backup-on-write is enabled, MemoryLoom snapshots previous files before
+atomic replacement and enforces retention limits.
+
+
+========================================================================
+12. Security Guidance
+========================================================================
+
+Recommended operational practices:
+
+- Run MemoryLoom behind trusted local network boundaries or secured tunnels
+- Scope access per user/project through metadata conventions and client policy
+- Restrict file permissions for local data directories
+- Rotate and protect database credentials in Postgres mode
+- Avoid storing secrets in memory content unless required by workflow policy
+
+
+========================================================================
+13. Performance Guidance
+========================================================================
+
+For growing workloads:
+
+- Prefer Postgres mode for higher write/read concurrency
+- Use metadata filters (project/user/type) to narrow candidate sets
+- Keep memory entries concise and specific to improve retrieval quality
+- Archive stale or low-value records to reduce noise
+- Use importance/confidence intentionally for ranking quality
+
+
+========================================================================
+14. Troubleshooting
+========================================================================
+
+Issue: Server starts but tools do not appear
+Actions:
+- Confirm client supports MCP
+- Verify command path to server.js
+- Check client logs for protocol errors
+
+Issue: Memory not persisted in JSON mode
+Actions:
+- Confirm MEMORYLOOM_DATA_DIR or MEMORYLOOM_DATA_FILE values
+- Verify directory write permissions
+- Inspect server stderr logs for write errors
+
+Issue: Postgres mode fails to start
+Actions:
+- Confirm MEMORYLOOM_STORAGE_MODE=postgres
+- Confirm MEMORYLOOM_POSTGRES_URL or DATABASE_URL is set
+- Verify pg package is installed
+- Validate database network connectivity and credentials
+
+Issue: Retrieval relevance feels noisy
+Actions:
+- Add metadata filters in search calls
+- Increase importance on critical memories
+- Use consistent memory_type and tags
+- Archive stale records
+
+
+========================================================================
+15. Recommended Memory Practices
+========================================================================
+
+Use stable conventions for high-quality retrieval:
+
+- user: persistent user identifier
+- project: stable project slug
+- memory_type: preference | decision | context | task | reference
+- tags: compact, reusable vocabulary
+
+Operational policy suggestions:
+- Archive rather than hard-delete when history matters
+- Reserve hard-delete for invalid/sensitive data cleanup
+- Update existing records when facts evolve, instead of duplicating
+- Keep memory content factual and actionable
+
+
+========================================================================
+16. Verification Workflow
+========================================================================
+
+MemoryLoom verification (`npm run verify`) validates:
+- MCP initialization handshake
+- Tool discovery and availability
+- Add/update/search/list/get lifecycle behavior
+- Tag clearing behavior in updates
+- Archive and hard-delete semantics
+- Stable timestamp migration behavior across restarts
+- Status and statistics response integrity
+
+
+========================================================================
+17. API Usage Examples
+========================================================================
+
+Example: Save a user preference
+Tool: add_memory
+{
+  "content": "User prefers concise technical responses with examples.",
+  "importance": 0.95,
+  "metadata": {
+    "user": "u-1042",
+    "project": "memoryloom",
+    "memory_type": "preference",
+    "tags": ["style", "response-format"],
+    "confidence": 0.99
+  }
+}
+
+Example: Retrieve preference during response generation
+Tool: search_memories
+{
+  "query": "response style preference for user",
+  "filters": {
+    "user": "u-1042",
+    "project": "memoryloom",
+    "memory_type": "preference"
+  },
+  "limit": 3
+}
+
+Example: Archive obsolete context
+Tool: delete_memory
+{
+  "id": "memory-id",
+  "hard_delete": false
+}
+
+
+========================================================================
+18. Release and Change Management
+========================================================================
+
+Documentation versioning guidelines:
+- Keep server and package versions aligned
+- Capture behavior changes in release notes
+- Update tool schema docs whenever input contracts change
+- Keep environment variable docs in sync with runtime behavior
+
+
+========================================================================
+19. Appendix: Quick Commands
+========================================================================
+
+Initialize:
+npm run setup
+
+Verify:
+npm run verify
+
+Start:
+npm start
+
+Docker:
+docker build -t memoryloom .
+docker run -i --rm -v "$(pwd)/data:/app/data" memoryloom
+
+Compose:
+docker compose up --build
+
+
+========================================================================
+End of MemoryLoom Documentation
+========================================================================

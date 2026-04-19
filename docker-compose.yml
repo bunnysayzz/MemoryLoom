@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  memoryloom:
+    build: .
+    container_name: memoryloom
+    environment:
+      MEMORYLOOM_STORAGE_MODE: json
+      MEMORYLOOM_DATA_DIR: /app/data
+      MEMORYLOOM_LOG_LEVEL: info
+      MEMORYLOOM_BACKUP_ON_WRITE: "true"
+      MEMORYLOOM_BACKUP_RETENTION: "5"
+      MEMORYLOOM_HEALTH_PORT: "8080"
+    volumes:
+      - ./data:/app/data
+    ports:
+      - "8080:8080"
+    stdin_open: true
+    tty: true

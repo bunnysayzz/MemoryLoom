@@ -1,0 +1,29 @@
+name: memoryloom
+region: nyc
+services:
+  - name: memoryloom-server
+    github:
+      repo: bunnysayzz/memoryloom
+      branch: main
+      deploy_on_push: true
+    dockerfile_path: Dockerfile
+    http_port: 8080
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    routes:
+      - path: /
+    envs:
+      - key: MEMORYLOOM_STORAGE_MODE
+        value: "json"
+      - key: MEMORYLOOM_DATA_DIR
+        value: "/app/data"
+      - key: MEMORYLOOM_LOG_LEVEL
+        value: "info"
+      - key: MEMORYLOOM_BACKUP_ON_WRITE
+        value: "true"
+      - key: MEMORYLOOM_BACKUP_RETENTION
+        value: "10"
+      - key: MEMORYLOOM_HEALTH_PORT
+        value: "8080"
+      - key: MEMORYLOOM_WEB_UI
+        value: "true"

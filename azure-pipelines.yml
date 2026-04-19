@@ -1,0 +1,60 @@
+# Azure Container Apps deployment pipeline
+trigger:
+  - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  dockerRegistryServiceConnection: 'memoryloom-acr'
+  imageRepository: 'memoryloom'
+  containerRegistry: 'memoryloom.azurecr.io'
+  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
+  tag: '$(Build.BuildId)'
+
+stages:
+  - stage: Build
+    displayName: Build and push Docker image
+    jobs:
+      - job: Build
+        displayName: Build
+        steps:
+          - task: Docker@2
+            displayName: Build and push image
+            inputs:
+              command: buildAndPush
+              repository: $(imageRepository)
+              dockerfile: $(dockerfilePath)
+              containerRegistry: $(dockerRegistryServiceConnection)
+              tags: |
+                $(tag)
+                latest
+
+  - stage: Deploy
+    displayName: Deploy to Azure Container Apps
+    dependsOn: Build
+    jobs:
+      - deployment: Deploy
+        displayName: Deploy
+        environment: 'production'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureCLI@2
+                  displayName: Deploy to Container Apps
+                  inputs:
+                    azureSubscription: 'memoryloom-subscription'
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      az containerapp update \
+                        --name memoryloom \
+                        --resource-group memoryloom-rg \
+                        --image $(containerRegistry)/$(imageRepository):$(tag) \
+                        --set-env-vars \
+                          MEMORYLOOM_STORAGE_MODE=json \
+                          MEMORYLOOM_DATA_DIR=/app/data \
+                          MEMORYLOOM_LOG_LEVEL=info \
+                          MEMORYLOOM_HEALTH_PORT=8080 \
+                          MEMORYLOOM_WEB_UI=true

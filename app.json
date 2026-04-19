@@ -1,0 +1,45 @@
+{
+  "name": "MemoryLoom",
+  "description": "MCP memory server with persistent context across sessions",
+  "repository": "https://github.com/bunnysayzz/memoryloom",
+  "logo": "https://raw.githubusercontent.com/heroku/node-js-getting-started/main/public/node.svg",
+  "keywords": ["mcp", "memory", "ai", "node"],
+  "env": {
+    "MEMORYLOOM_STORAGE_MODE": {
+      "description": "Storage backend mode",
+      "value": "json"
+    },
+    "MEMORYLOOM_DATA_DIR": {
+      "description": "Data directory path (JSON mode)",
+      "value": "/app/data"
+    },
+    "MEMORYLOOM_LOG_LEVEL": {
+      "description": "Log level",
+      "value": "info"
+    },
+    "MEMORYLOOM_BACKUP_ON_WRITE": {
+      "description": "Enable rolling backups on each write",
+      "value": "true"
+    },
+    "MEMORYLOOM_BACKUP_RETENTION": {
+      "description": "Number of backup files to retain",
+      "value": "10"
+    },
+    "MEMORYLOOM_POSTGRES_URL": {
+      "description": "Postgres connection string (when MEMORYLOOM_STORAGE_MODE=postgres)",
+      "required": false
+    },
+    "MEMORYLOOM_API_KEY": {
+      "description": "Optional API key required for all MCP tool calls",
+      "required": false
+    },
+    "MEMORYLOOM_HEALTH_PORT": {
+      "description": "Optional health endpoint port exposing /health and /ready (uses $PORT automatically)",
+      "required": false
+    },
+    "MEMORYLOOM_MAX_TOOL_CALLS_PER_MINUTE": {
+      "description": "Optional global per-minute tool call limit (0 disables)",
+      "value": "0"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: memoryloom
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: MEMORYLOOM_STORAGE_MODE
+        value: json
+      - key: MEMORYLOOM_DATA_DIR
+        value: /app/data
+      - key: MEMORYLOOM_LOG_LEVEL
+        value: info
+      - key: MEMORYLOOM_BACKUP_ON_WRITE
+        value: "true"
+      - key: MEMORYLOOM_BACKUP_RETENTION
+        value: "10"
