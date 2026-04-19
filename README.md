@@ -39,13 +39,10 @@ MemoryLoom supports **two connection modes**:
 
 **[📑 Complete Documentation Index](DOCUMENTATION_INDEX.md)** - Navigate all documentation
 
-- **[HTTP MCP Connection Guide](HTTP_MCP_GUIDE.md)** - Connect to remote MemoryLoom instances (Heroku, Railway, etc.)
 - **[Editor Setup Guide](EDITOR_SETUP.md)** - Step-by-step configuration for Claude Desktop, Cursor, VS Code, Windsurf, and Zed
 - **[Deployment Guide](DEPLOYMENT_GUIDE.md)** - Deploy to 10+ platforms with one-click or manual setup
-- **[No Credit Card Deploy](NO_CREDIT_CARD_DEPLOY.md)** - Deploy to Railway or Fly.io without credit card
 - **[Quick Reference Card](QUICK_REFERENCE.md)** - Printable cheat sheet with config locations, commands, and troubleshooting
 - **[Troubleshooting Guide](TROUBLESHOOTING.md)** - Comprehensive solutions for common issues across all editors
-- **[Migration Guide](MIGRATION_GUIDE.md)** - Migrate from other memory servers, switch storage modes, team setup
 - **API Documentation** (MemoryLoom_Documentation.txt) - Complete API reference, tool schemas, and usage examples
 - **[Quick Start](#quick-start)** - Get running in 2 minutes
 
@@ -162,8 +159,6 @@ MemoryLoom works with all major MCP-compatible editors and AI clients.
   }
 }
 ```
-
-**📖 [Complete HTTP MCP Guide →](HTTP_MCP_GUIDE.md)**
 
 ### Supported Editors
 
