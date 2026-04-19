@@ -1130,7 +1130,15 @@ function processBuffer() {
 
       const rawMessage = buffer.slice(messageStart, messageEnd).toString("utf8");
       buffer = buffer.slice(messageEnd);
-      const message = JSON.parse(rawMessage);
+      
+      let message;
+      try {
+        message = JSON.parse(rawMessage);
+      } catch (parseError) {
+        writeLog("error", "json_parse_error", { details: parseError instanceof Error ? parseError.message : "Invalid JSON" });
+        continue;
+      }
+      
       const response = {
         jsonrpc: "2.0",
         id: message.id

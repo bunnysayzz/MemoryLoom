@@ -3,6 +3,7 @@ app = "memoryloom"
 primary_region = "sin"
 
 [build]
+  builder = "dockerfile"
 
 
 [env]

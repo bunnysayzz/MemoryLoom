@@ -118,6 +118,12 @@ const child = spawn("node", ["server.js"], {
   stdio: ["pipe", "pipe", "inherit"]
 });
 
+child.on('error', (err) => {
+  console.error('Failed to start server process:', err);
+  rmSync(tempDir, { recursive: true, force: true });
+  process.exit(1);
+});
+
 let buffer = Buffer.alloc(0);
 const responses = new Map();
 
