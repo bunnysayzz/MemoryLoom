@@ -27,7 +27,14 @@ function copyToClipboard(elementId, button) {
   const element = document.getElementById(elementId);
   if (!element) return;
 
-  const text = element.textContent || element.innerText;
+  let text = element.textContent || element.innerText;
+  
+  // Replace placeholder with actual API key
+  const apiKeyElement = document.getElementById('api-key-value');
+  if (apiKeyElement && apiKeyElement.textContent) {
+    text = text.replace('${MEMORYLOOM_API_KEY}', apiKeyElement.textContent);
+  }
+  
   navigator.clipboard.writeText(text).then(() => {
     // Show feedback
     if (button) {
@@ -97,22 +104,71 @@ async function fetchSetupInfo() {
 async function displayApiKey() {
   const setupInfo = await fetchSetupInfo();
   if (setupInfo && setupInfo.apiKey) {
-    const apiKeyElement = document.getElementById('api-key-display');
-    const apiKeyValue = document.getElementById('api-key-value');
-    if (apiKeyValue) {
-      apiKeyValue.textContent = setupInfo.apiKey;
-      apiKeyValue.style.display = 'block';
+    const apiKeyElement = document.getElementById('api-key-value');
+    if (apiKeyElement) {
+      apiKeyElement.textContent = setupInfo.apiKey;
+      apiKeyElement.style.display = 'block';
     }
     if (apiKeyElement) {
       apiKeyElement.style.display = 'block';
     }
+    
+    // Replace placeholder in all config snippets with actual API key
+    const configElements = document.querySelectorAll('pre[id$="-config"]');
+    console.log('Found config elements:', configElements.length);
+    configElements.forEach(element => {
+      if (element.textContent.includes('${MEMORYLOOM_API_KEY}')) {
+        element.textContent = element.textContent.replace('${MEMORYLOOM_API_KEY}', setupInfo.apiKey);
+        console.log('Replaced placeholder in:', element.id);
+      }
+    });
+  } else {
+    console.log('No setup info or API key available');
+  }
+}
+
+// Regenerate API key
+async function regenerateApiKey() {
+  const serverUrl = getCurrentServerUrl();
+  try {
+    const response = await fetch(`${serverUrl}/api/regenerate-api-key`, {
+      method: 'POST'
+    });
+    const data = await response.json();
+    if (data.ok) {
+      // Update the displayed API key
+      const apiKeyValue = document.getElementById('api-key-value');
+      if (apiKeyValue) {
+        apiKeyValue.textContent = data.apiKey;
+      }
+      
+      // Update all config snippets with new API key
+      const configElements = document.querySelectorAll('pre[id$="-config"]');
+      configElements.forEach(element => {
+        // Replace any existing API key with the new one
+        const currentContent = element.textContent;
+        // First replace the placeholder if it exists
+        if (currentContent.includes('${MEMORYLOOM_API_KEY}')) {
+          element.textContent = currentContent.replace('${MEMORYLOOM_API_KEY}', data.apiKey);
+        } else {
+          // Replace any existing API key value (looks for the pattern in the config)
+          element.textContent = currentContent.replace(/"MEMORYLOOM_API_KEY":\s*"[^"]+"/, `"MEMORYLOOM_API_KEY": "${data.apiKey}"`);
+        }
+      });
+      
+      return data.apiKey;
+    } else {
+      throw new Error(data.error || 'Failed to regenerate API key');
+    }
+  } catch (error) {
+    console.error('Failed to regenerate API key:', error);
+    alert('Failed to regenerate API key. Please try again.');
   }
 }
 
 // Download config file
 function downloadConfig(editor) {
   const serverUrl = getCurrentServerUrl();
-  const apiKey = document.getElementById('api-key-value')?.textContent || '';
   
   let config;
   let filename;
@@ -125,7 +181,7 @@ function downloadConfig(editor) {
             "command": "node",
             "args": ["/absolute/path/to/memoryloom/server.js"],
             "env": {
-              "MEMORYLOOM_API_KEY": apiKey
+              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
             }
           }
         }
@@ -139,7 +195,7 @@ function downloadConfig(editor) {
             "command": "node",
             "args": ["/absolute/path/to/memoryloom/server.js"],
             "env": {
-              "MEMORYLOOM_API_KEY": apiKey
+              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
             }
           }
         }
@@ -153,24 +209,181 @@ function downloadConfig(editor) {
             "command": "node",
             "args": ["/absolute/path/to/memoryloom/server.js"],
             "env": {
-              "MEMORYLOOM_API_KEY": apiKey
+              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
             }
           }
         }
       };
       filename = 'vscode_settings.json';
       break;
+    case 'windsurf':
+      config = {
+        "mcpServers": {
+          "memoryloom": {
+            "command": "node",
+            "args": ["/absolute/path/to/memoryloom/server.js"],
+            "env": {
+              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+            }
+          }
+        }
+      };
+      filename = 'windsurf_config.json';
+      break;
+    case 'zed':
+      config = {
+        "lsp": {
+          "memoryloom": {
+            "command": "node",
+            "args": ["/absolute/path/to/memoryloom/server.js"],
+            "env": {
+              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+            }
+          }
+        }
+      };
+      filename = 'zed_config.json';
+      break;
+    case 'continue':
+      config = {
+        "mcpServers": {
+          "memoryloom": {
+            "command": "node",
+            "args": ["/absolute/path/to/memoryloom/server.js"],
+            "env": {
+              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+            }
+          }
+        }
+      };
+      filename = 'continue_config.json';
+      break;
+    case 'aider':
+      config = {
+        "mcpServers": {
+          "memoryloom": {
+            "command": "node",
+            "args": ["/absolute/path/to/memoryloom/server.js"],
+            "env": {
+              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+            }
+          }
+        }
+      };
+      filename = 'aider_config.json';
+      break;
+    case 'jetbrains':
+      config = {
+        "mcpServers": {
+          "memoryloom": {
+            "command": "node",
+            "args": ["/absolute/path/to/memoryloom/server.js"],
+            "env": {
+              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+            }
+          }
+        }
+      };
+      filename = 'jetbrains_config.json';
+      break;
+    case 'codeium':
+      config = {
+        "mcpServers": {
+          "memoryloom": {
+            "command": "node",
+            "args": ["/absolute/path/to/memoryloom/server.js"],
+            "env": {
+              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+            }
+          }
+        }
+      };
+      filename = 'codeium_config.json';
+      break;
+    case 'tabby':
+      config = {
+        "mcpServers": {
+          "memoryloom": {
+            "command": "node",
+            "args": ["/absolute/path/to/memoryloom/server.js"],
+            "env": {
+              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+            }
+          }
+        }
+      };
+      filename = 'tabby_config.json';
+      break;
+    case 'replit':
+      config = {
+        "mcpServers": {
+          "memoryloom": {
+            "command": "node",
+            "args": ["/absolute/path/to/memoryloom/server.js"],
+            "env": {
+              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+            }
+          }
+        }
+      };
+      filename = 'replit_config.json';
+      break;
+    case 'cline':
+      config = {
+        "mcpServers": {
+          "memoryloom": {
+            "command": "node",
+            "args": ["/absolute/path/to/memoryloom/server.js"],
+            "env": {
+              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+            }
+          }
+        }
+      };
+      filename = 'cline_config.json';
+      break;
+    case 'roocode':
+      config = {
+        "mcpServers": {
+          "memoryloom": {
+            "command": "node",
+            "args": ["/absolute/path/to/memoryloom/server.js"],
+            "env": {
+              "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+            }
+          }
+        }
+      };
+      filename = 'roocode_config.json';
+      break;
   }
   
-  const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  // Replace placeholder with actual API key
+  const apiKeyElement = document.getElementById('api-key-value');
+  if (apiKeyElement && apiKeyElement.textContent) {
+    const configString = JSON.stringify(config, null, 2);
+    const configWithKey = configString.replace('${MEMORYLOOM_API_KEY}', apiKeyElement.textContent);
+    const blob = new Blob([configWithKey], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } else {
+    // Fallback to original behavior if no API key available
+    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
 }
 
 // Health check functionality
@@ -278,8 +491,30 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
   
+  // Initialize regenerate API key button
+  document.getElementById('regenerate-api-key')?.addEventListener('click', async function() {
+    const originalText = this.textContent;
+    this.textContent = 'Regenerating...';
+    this.disabled = true;
+    
+    await regenerateApiKey();
+    
+    this.textContent = originalText;
+    this.disabled = false;
+  });
+  
   // Initialize download buttons
   document.getElementById('download-claude')?.addEventListener('click', () => downloadConfig('claude'));
   document.getElementById('download-cursor')?.addEventListener('click', () => downloadConfig('cursor'));
   document.getElementById('download-vscode')?.addEventListener('click', () => downloadConfig('vscode'));
+  document.getElementById('download-windsurf')?.addEventListener('click', () => downloadConfig('windsurf'));
+  document.getElementById('download-zed')?.addEventListener('click', () => downloadConfig('zed'));
+  document.getElementById('download-continue')?.addEventListener('click', () => downloadConfig('continue'));
+  document.getElementById('download-aider')?.addEventListener('click', () => downloadConfig('aider'));
+  document.getElementById('download-jetbrains')?.addEventListener('click', () => downloadConfig('jetbrains'));
+  document.getElementById('download-codeium')?.addEventListener('click', () => downloadConfig('codeium'));
+  document.getElementById('download-tabby')?.addEventListener('click', () => downloadConfig('tabby'));
+  document.getElementById('download-replit')?.addEventListener('click', () => downloadConfig('replit'));
+  document.getElementById('download-cline')?.addEventListener('click', () => downloadConfig('cline'));
+  document.getElementById('download-roocode')?.addEventListener('click', () => downloadConfig('roocode'));
 });

@@ -25,39 +25,35 @@
       <div class="grid-mask"></div>
     </div>
 
-    <header class="topbar reveal">
-      <div class="brand">MemoryLoom</div>
-      <div class="status-indicator">
-        <span class="status-dot"></span>
-        <span>Server Running</span>
+    <header>
+      <div class="topbar">
+        <div class="brand">
+          <img src="/assets/memoryloom.png" alt="MemoryLoom Logo" class="brand-logo" />
+          <h1>MemoryLoom</h1>
+        </div>
+        <div class="status-indicator">
+          <span class="status-dot"></span>
+          <span class="status-text">Checking...</span>
+        </div>
+        <nav>
+          <a href="#setup">Setup</a>
+          <a href="#tools">API Tools</a>
+          <a href="#health">Health</a>
+        </nav>
       </div>
-      <nav>
-        <a href="#setup">Setup</a>
-        <a href="#tools">API Tools</a>
-        <a href="#health">Health</a>
-      </nav>
     </header>
 
     <main>
       <section class="hero reveal">
-        <div class="hero-logo">
-          <img src="/assets/memoryloom.png" alt="MemoryLoom Logo" />
-        </div>
-        <p class="eyebrow">✅ YOUR MEMORY SERVER IS READY</p>
-        <h1>Connect Your Editor to Start Using Persistent Memory</h1>
-        <p class="lead">
-          Your MemoryLoom server is running at <code id="server-url">this URL</code>.
-          Follow the setup guide below to connect your editor and start storing persistent AI memory.
-        </p>
-        
         <div id="api-key-display" style="display: none;">
           <h3>🔑 Your API Key</h3>
           <div class="api-key-container">
             <code id="api-key-value"></code>
             <button class="btn primary" id="copy-api-key" aria-label="Copy API key to clipboard">Copy</button>
+            <button class="btn ghost" id="regenerate-api-key" aria-label="Regenerate API key">Regenerate</button>
           </div>
           <p class="api-key-note">
-            ⚠️ Keep this key secret. Add it to your editor configuration below.
+            ⚠️ Keep this key secret. Your config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects this key from your environment.
           </p>
         </div>
         
@@ -74,6 +70,16 @@
             <button class="tab-btn active" data-tab="claude" aria-label="Show Claude Desktop setup instructions">Claude Desktop</button>
             <button class="tab-btn" data-tab="cursor" aria-label="Show Cursor IDE setup instructions">Cursor</button>
             <button class="tab-btn" data-tab="vscode" aria-label="Show VS Code setup instructions">VS Code</button>
+            <button class="tab-btn" data-tab="windsurf" aria-label="Show Windsurf setup instructions">Windsurf</button>
+            <button class="tab-btn" data-tab="zed" aria-label="Show Zed setup instructions">Zed</button>
+            <button class="tab-btn" data-tab="continue" aria-label="Show Continue.dev setup instructions">Continue.dev</button>
+            <button class="tab-btn" data-tab="aider" aria-label="Show Aider setup instructions">Aider</button>
+            <button class="tab-btn" data-tab="jetbrains" aria-label="Show JetBrains setup instructions">JetBrains</button>
+            <button class="tab-btn" data-tab="codeium" aria-label="Show Codeium setup instructions">Codeium</button>
+            <button class="tab-btn" data-tab="tabby" aria-label="Show Tabby setup instructions">Tabby</button>
+            <button class="tab-btn" data-tab="replit" aria-label="Show Replit setup instructions">Replit</button>
+            <button class="tab-btn" data-tab="cline" aria-label="Show Cline setup instructions">Cline</button>
+            <button class="tab-btn" data-tab="roocode" aria-label="Show Roo Code setup instructions">Roo Code</button>
             <button class="tab-btn" data-tab="local" aria-label="Show local setup instructions">Local Setup</button>
           </div>
 
@@ -89,9 +95,9 @@
   "mcpServers": {
     "memoryloom": {
       "command": "node",
-      "args": ["/absolute/path/to/memoryloom/server.js"],
+      "args": ["${SERVER_PATH}"],
       "env": {
-        "MEMORYLOOM_API_KEY": "YOUR_API_KEY_HERE"
+        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
       }
     }
   }
@@ -99,6 +105,7 @@
             </div>
             <p class="note">📍 <strong>Config Location:</strong> <code>~/Library/Application Support/Claude/claude_desktop_config.json</code> (macOS)</p>
             <p class="note">⚠️ <strong>Important:</strong> MemoryLoom runs as a local stdio server. First run <code>npm start</code> in the MemoryLoom directory.</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment. No manual replacement needed.</p>
           </div>
 
           <div class="tab-content" id="cursor-tab">
@@ -113,9 +120,9 @@
   "context_servers": {
     "memoryloom": {
       "command": "node",
-      "args": ["/absolute/path/to/memoryloom/server.js"],
+      "args": ["${SERVER_PATH}"],
       "env": {
-        "MEMORYLOOM_API_KEY": "YOUR_API_KEY_HERE"
+        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
       }
     }
   }
@@ -123,6 +130,7 @@
             </div>
             <p class="note">📍 <strong>Config Location:</strong> Cursor Settings → Extensions → MCP</p>
             <p class="note">⚠️ <strong>Important:</strong> MemoryLoom runs as a local stdio server. First run <code>npm start</code> in the MemoryLoom directory.</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment. No manual replacement needed.</p>
           </div>
 
           <div class="tab-content" id="vscode-tab">
@@ -139,7 +147,7 @@
       "command": "node",
       "args": ["/absolute/path/to/memoryloom/server.js"],
       "env": {
-        "MEMORYLOOM_API_KEY": "YOUR_API_KEY_HERE"
+        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
       }
     }
   }
@@ -147,6 +155,247 @@
             </div>
             <p class="note">📍 <strong>Config Location:</strong> VS Code Settings → Extensions → GitHub Copilot</p>
             <p class="note">⚠️ <strong>Important:</strong> MemoryLoom runs as a local stdio server. First run <code>npm start</code> in the MemoryLoom directory.</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment. No manual replacement needed.</p>
+          </div>
+
+          <div class="tab-content" id="windsurf-tab">
+            <h3>Windsurf Setup</h3>
+            <p>Add this to your Windsurf MCP configuration:</p>
+            <div class="code-block">
+              <div class="button-container">
+                <button class="copy-btn" data-target="windsurf-config" aria-label="Copy Windsurf configuration to clipboard">Copy</button>
+                <button id="download-windsurf" class="btn ghost" aria-label="Download Windsurf configuration file">Download</button>
+              </div>
+              <pre id="windsurf-config">{
+  "mcpServers": {
+    "memoryloom": {
+      "command": "node",
+      "args": ["/absolute/path/to/memoryloom/server.js"],
+      "env": {
+        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+      }
+    }
+  }
+}</pre>
+            </div>
+            <p class="note">📍 <strong>Config Location:</strong> Windsurf Settings → MCP Servers</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment.</p>
+          </div>
+
+          <div class="tab-content" id="zed-tab">
+            <h3>Zed Setup</h3>
+            <p>Add this to your Zed MCP configuration:</p>
+            <div class="code-block">
+              <div class="button-container">
+                <button class="copy-btn" data-target="zed-config" aria-label="Copy Zed configuration to clipboard">Copy</button>
+                <button id="download-zed" class="btn ghost" aria-label="Download Zed configuration file">Download</button>
+              </div>
+              <pre id="zed-config">{
+  "lsp": {
+    "memoryloom": {
+      "command": "node",
+      "args": ["/absolute/path/to/memoryloom/server.js"],
+      "env": {
+        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+      }
+    }
+  }
+}</pre>
+            </div>
+            <p class="note">📍 <strong>Config Location:</strong> Zed Settings → LSP → Add Server</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment.</p>
+          </div>
+
+          <div class="tab-content" id="continue-tab">
+            <h3>Continue.dev Setup</h3>
+            <p>Add this to your Continue.dev MCP configuration:</p>
+            <div class="code-block">
+              <div class="button-container">
+                <button class="copy-btn" data-target="continue-config" aria-label="Copy Continue.dev configuration to clipboard">Copy</button>
+                <button id="download-continue" class="btn ghost" aria-label="Download Continue.dev configuration file">Download</button>
+              </div>
+              <pre id="continue-config">{
+  "mcpServers": {
+    "memoryloom": {
+      "command": "node",
+      "args": ["/absolute/path/to/memoryloom/server.js"],
+      "env": {
+        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+      }
+    }
+  }
+}</pre>
+            </div>
+            <p class="note">📍 <strong>Config Location:</strong> Continue.dev Settings → MCP Servers</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment.</p>
+          </div>
+
+          <div class="tab-content" id="aider-tab">
+            <h3>Aider Setup</h3>
+            <p>Add this to your Aider MCP configuration:</p>
+            <div class="code-block">
+              <div class="button-container">
+                <button class="copy-btn" data-target="aider-config" aria-label="Copy Aider configuration to clipboard">Copy</button>
+                <button id="download-aider" class="btn ghost" aria-label="Download Aider configuration file">Download</button>
+              </div>
+              <pre id="aider-config">{
+  "mcpServers": {
+    "memoryloom": {
+      "command": "node",
+      "args": ["/absolute/path/to/memoryloom/server.js"],
+      "env": {
+        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+      }
+    }
+  }
+}</pre>
+            </div>
+            <p class="note">📍 <strong>Config Location:</strong> Aider config file (.aider.conf.yaml)</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment.</p>
+          </div>
+
+          <div class="tab-content" id="jetbrains-tab">
+            <h3>JetBrains IDEs Setup</h3>
+            <p>Add this to your JetBrains MCP configuration:</p>
+            <div class="code-block">
+              <div class="button-container">
+                <button class="copy-btn" data-target="jetbrains-config" aria-label="Copy JetBrains configuration to clipboard">Copy</button>
+                <button id="download-jetbrains" class="btn ghost" aria-label="Download JetBrains configuration file">Download</button>
+              </div>
+              <pre id="jetbrains-config">{
+  "mcpServers": {
+    "memoryloom": {
+      "command": "node",
+      "args": ["/absolute/path/to/memoryloom/server.js"],
+      "env": {
+        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+      }
+    }
+  }
+}</pre>
+            </div>
+            <p class="note">📍 <strong>Config Location:</strong> JetBrains Settings → Tools → MCP Servers</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment.</p>
+          </div>
+
+          <div class="tab-content" id="codeium-tab">
+            <h3>Codeium Setup</h3>
+            <p>Add this to your Codeium MCP configuration:</p>
+            <div class="code-block">
+              <div class="button-container">
+                <button class="copy-btn" data-target="codeium-config" aria-label="Copy Codeium configuration to clipboard">Copy</button>
+                <button id="download-codeium" class="btn ghost" aria-label="Download Codeium configuration file">Download</button>
+              </div>
+              <pre id="codeium-config">{
+  "mcpServers": {
+    "memoryloom": {
+      "command": "node",
+      "args": ["/absolute/path/to/memoryloom/server.js"],
+      "env": {
+        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+      }
+    }
+  }
+}</pre>
+            </div>
+            <p class="note">📍 <strong>Config Location:</strong> Codeium Settings → MCP Servers</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment.</p>
+          </div>
+
+          <div class="tab-content" id="tabby-tab">
+            <h3>Tabby Setup</h3>
+            <p>Add this to your Tabby MCP configuration:</p>
+            <div class="code-block">
+              <div class="button-container">
+                <button class="copy-btn" data-target="tabby-config" aria-label="Copy Tabby configuration to clipboard">Copy</button>
+                <button id="download-tabby" class="btn ghost" aria-label="Download Tabby configuration file">Download</button>
+              </div>
+              <pre id="tabby-config">{
+  "mcpServers": {
+    "memoryloom": {
+      "command": "node",
+      "args": ["/absolute/path/to/memoryloom/server.js"],
+      "env": {
+        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+      }
+    }
+  }
+}</pre>
+            </div>
+            <p class="note">📍 <strong>Config Location:</strong> Tabby Settings → MCP Servers</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment.</p>
+          </div>
+
+          <div class="tab-content" id="replit-tab">
+            <h3>Replit Setup</h3>
+            <p>Add this to your Replit MCP configuration:</p>
+            <div class="code-block">
+              <div class="button-container">
+                <button class="copy-btn" data-target="replit-config" aria-label="Copy Replit configuration to clipboard">Copy</button>
+                <button id="download-replit" class="btn ghost" aria-label="Download Replit configuration file">Download</button>
+              </div>
+              <pre id="replit-config">{
+  "mcpServers": {
+    "memoryloom": {
+      "command": "node",
+      "args": ["/absolute/path/to/memoryloom/server.js"],
+      "env": {
+        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+      }
+    }
+  }
+}</pre>
+            </div>
+            <p class="note">📍 <strong>Config Location:</strong> Replit Settings → Tools → MCP</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment.</p>
+          </div>
+
+          <div class="tab-content" id="cline-tab">
+            <h3>Cline Setup (VS Code Extension)</h3>
+            <p>Add this to your Cline MCP configuration:</p>
+            <div class="code-block">
+              <div class="button-container">
+                <button class="copy-btn" data-target="cline-config" aria-label="Copy Cline configuration to clipboard">Copy</button>
+                <button id="download-cline" class="btn ghost" aria-label="Download Cline configuration file">Download</button>
+              </div>
+              <pre id="cline-config">{
+  "mcpServers": {
+    "memoryloom": {
+      "command": "node",
+      "args": ["/absolute/path/to/memoryloom/server.js"],
+      "env": {
+        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+      }
+    }
+  }
+}</pre>
+            </div>
+            <p class="note">📍 <strong>Config Location:</strong> VS Code Settings → Cline → MCP Servers</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment.</p>
+          </div>
+
+          <div class="tab-content" id="roocode-tab">
+            <h3>Roo Code Setup</h3>
+            <p>Add this to your Roo Code MCP configuration:</p>
+            <div class="code-block">
+              <div class="button-container">
+                <button class="copy-btn" data-target="roocode-config" aria-label="Copy Roo Code configuration to clipboard">Copy</button>
+                <button id="download-roocode" class="btn ghost" aria-label="Download Roo Code configuration file">Download</button>
+              </div>
+              <pre id="roocode-config">{
+  "mcpServers": {
+    "memoryloom": {
+      "command": "node",
+      "args": ["/absolute/path/to/memoryloom/server.js"],
+      "env": {
+        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+      }
+    }
+  }
+}</pre>
+            </div>
+            <p class="note">📍 <strong>Config Location:</strong> Roo Code Settings → MCP Servers</p>
+            <p class="note">💡 <strong>Auto-Detection:</strong> Config uses <code>${MEMORYLOOM_API_KEY}</code> which auto-detects the API key from your environment.</p>
           </div>
 
           <div class="tab-content" id="local-tab">
@@ -165,7 +414,10 @@ npm start
   "mcpServers": {
     "memoryloom": {
       "command": "node",
-      "args": ["/absolute/path/to/memoryloom/server.js"]
+      "args": ["/absolute/path/to/memoryloom/server.js"],
+      "env": {
+        "MEMORYLOOM_API_KEY": "${MEMORYLOOM_API_KEY}"
+      }
     }
   }
 }</pre>

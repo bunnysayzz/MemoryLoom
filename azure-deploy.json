@@ -1,0 +1,170 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "appName": {
+      "type": "string",
+      "defaultValue": "[concat('memoryloom-', uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "Name of the Container App"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources"
+      }
+    },
+    "containerImage": {
+      "type": "string",
+      "defaultValue": "ghcr.io/bunnysayzz/memoryloom:latest",
+      "metadata": {
+        "description": "Container image to deploy"
+      }
+    },
+    "storageMode": {
+      "type": "string",
+      "defaultValue": "json",
+      "allowedValues": [
+        "json",
+        "postgres"
+      ],
+      "metadata": {
+        "description": "Storage backend mode"
+      }
+    },
+    "postgresUrl": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "PostgreSQL connection string (required if storageMode is postgres)"
+      }
+    },
+    "apiKey": {
+      "type": "securestring",
+      "defaultValue": "[newGuid()]",
+      "metadata": {
+        "description": "API key for authentication (auto-generated if not provided)"
+      }
+    }
+  },
+  "variables": {
+    "containerAppEnvName": "[concat(parameters('appName'), '-env')]",
+    "logAnalyticsName": "[concat(parameters('appName'), '-logs')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2021-06-01",
+      "name": "[variables('logAnalyticsName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "sku": {
+          "name": "PerGB2018"
+        },
+        "retentionInDays": 30
+      }
+    },
+    {
+      "type": "Microsoft.App/managedEnvironments",
+      "apiVersion": "2022-03-01",
+      "name": "[variables('containerAppEnvName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsName'))]"
+      ],
+      "properties": {
+        "appLogsConfiguration": {
+          "destination": "log-analytics",
+          "logAnalyticsConfiguration": {
+            "customerId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsName'))).customerId]",
+            "sharedKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsName')), '2021-06-01').primarySharedKey]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2022-03-01",
+      "name": "[parameters('appName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.App/managedEnvironments', variables('containerAppEnvName'))]"
+      ],
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', variables('containerAppEnvName'))]",
+        "configuration": {
+          "ingress": {
+            "external": true,
+            "targetPort": 8080,
+            "transport": "http",
+            "allowInsecure": false
+          },
+          "secrets": [
+            {
+              "name": "postgres-url",
+              "value": "[parameters('postgresUrl')]"
+            },
+            {
+              "name": "api-key",
+              "value": "[parameters('apiKey')]"
+            }
+          ]
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "memoryloom",
+              "image": "[parameters('containerImage')]",
+              "env": [
+                {
+                  "name": "MEMORYLOOM_STORAGE_MODE",
+                  "value": "[parameters('storageMode')]"
+                },
+                {
+                  "name": "MEMORYLOOM_POSTGRES_URL",
+                  "secretRef": "postgres-url"
+                },
+                {
+                  "name": "MEMORYLOOM_API_KEY",
+                  "secretRef": "api-key"
+                },
+                {
+                  "name": "MEMORYLOOM_HEALTH_PORT",
+                  "value": "8080"
+                },
+                {
+                  "name": "MEMORYLOOM_LOG_LEVEL",
+                  "value": "info"
+                },
+                {
+                  "name": "MEMORYLOOM_WEB_UI",
+                  "value": "true"
+                }
+              ],
+              "resources": {
+                "cpu": 0.5,
+                "memory": "1Gi"
+              }
+            }
+          ],
+          "scale": {
+            "minReplicas": 1,
+            "maxReplicas": 3
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "containerAppFQDN": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.App/containerApps', parameters('appName'))).configuration.ingress.fqdn]"
+    },
+    "apiKey": {
+      "type": "string",
+      "value": "[parameters('apiKey')]"
+    }
+  }
+}

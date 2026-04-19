@@ -14,6 +14,7 @@ const DEFAULT_DATA_DIR = path.join(process.cwd(), "data");
 const UI_DIR = path.join(process.cwd(), "ui");
 const MAX_BUFFER_SIZE = 10 * 1024 * 1024; // 10MB max stdin buffer
 const MAX_CONTENT_LENGTH = 100 * 1024; // 100KB max memory content
+const MAX_METADATA_FIELD_LENGTH = 255; // Max length for metadata string fields
 const API_KEY_FILE = ".api_key";
 const UI_ASSETS = {
   "/": { file: "index.html", contentType: "text/html; charset=utf-8" },
@@ -87,6 +88,7 @@ CONFIG.backupDir = path.join(CONFIG.dataDir, "backups");
 CONFIG.apiKey = getOrCreateApiKey(CONFIG.dataDir);
 
 const EMBEDDING_DIMENSION = 64;
+const MAX_GRAMS = 1000;
 
 if (!VALID_LOG_LEVELS.has(CONFIG.logLevel)) {
   CONFIG.logLevel = "info";
@@ -100,7 +102,7 @@ if (!Number.isFinite(CONFIG.healthPort) || CONFIG.healthPort < 0 || CONFIG.healt
 
 const store = createMemoryStore(CONFIG);
 const toolCallWindow = {
-  minute: "",
+  minute: 0,
   count: 0
 };
 
@@ -180,9 +182,15 @@ function generateEmbedding(text) {
   const grams = [];
 
   for (const token of tokens) {
+    if (grams.length >= MAX_GRAMS) {
+      break;
+    }
     grams.push(token);
     if (token.length > 2) {
       for (let index = 0; index <= token.length - 3; index += 1) {
+        if (grams.length >= MAX_GRAMS) {
+          break;
+        }
         grams.push(token.slice(index, index + 3));
       }
     }
@@ -236,13 +244,36 @@ function normalizeMetadata(metadata = {}, existing = {}, options = {}) {
     ? existing.last_accessed_at || createdAt
     : existing.last_accessed_at || createdAt;
   const hasTags = Array.isArray(metadata.tags);
+  
+  const user = normalizeText(metadata.user) || existing.user || "default";
+  const project = normalizeText(metadata.project) || existing.project || "general";
+  const source = normalizeText(metadata.source) || existing.source || "manual";
+  const memoryType = normalizeText(metadata.memory_type) || existing.memory_type || "general";
+  const conflictKey = normalizeText(metadata.conflict_key) || existing.conflict_key || "";
+  
+  if (user.length > MAX_METADATA_FIELD_LENGTH) {
+    throw new Error(`Metadata field 'user' exceeds maximum length of ${MAX_METADATA_FIELD_LENGTH} characters.`);
+  }
+  if (project.length > MAX_METADATA_FIELD_LENGTH) {
+    throw new Error(`Metadata field 'project' exceeds maximum length of ${MAX_METADATA_FIELD_LENGTH} characters.`);
+  }
+  if (source.length > MAX_METADATA_FIELD_LENGTH) {
+    throw new Error(`Metadata field 'source' exceeds maximum length of ${MAX_METADATA_FIELD_LENGTH} characters.`);
+  }
+  if (memoryType.length > MAX_METADATA_FIELD_LENGTH) {
+    throw new Error(`Metadata field 'memory_type' exceeds maximum length of ${MAX_METADATA_FIELD_LENGTH} characters.`);
+  }
+  if (conflictKey.length > MAX_METADATA_FIELD_LENGTH) {
+    throw new Error(`Metadata field 'conflict_key' exceeds maximum length of ${MAX_METADATA_FIELD_LENGTH} characters.`);
+  }
+  
   return {
-    user: normalizeText(metadata.user) || existing.user || "default",
-    project: normalizeText(metadata.project) || existing.project || "general",
+    user,
+    project,
     tags: hasTags ? normalizeTags(metadata.tags) : existing.tags || [],
-    source: normalizeText(metadata.source) || existing.source || "manual",
-    memory_type: normalizeText(metadata.memory_type) || existing.memory_type || "general",
-    conflict_key: normalizeText(metadata.conflict_key) || existing.conflict_key || "",
+    source,
+    memory_type: memoryType,
+    conflict_key: conflictKey,
     confidence: clampNumber(metadata.confidence ?? existing.confidence ?? 1, 0, 1, 1),
     created_at: createdAt,
     updated_at: updatedAt,
@@ -435,7 +466,8 @@ function enforceRateLimit() {
     return;
   }
 
-  const minuteKey = new Date().toISOString().slice(0, 16);
+  const now = Date.now();
+  const minuteKey = Math.floor(now / 60000);
   if (toolCallWindow.minute !== minuteKey) {
     toolCallWindow.minute = minuteKey;
     toolCallWindow.count = 0;
@@ -1299,14 +1331,14 @@ if (CONFIG.healthPort > 0) {
     // API endpoint to get server info and API key for UI (no auth required for setup)
     if (route === "/api/setup-info") {
       try {
-        const status = await store.status();
         const payload = {
           ok: true,
           server: SERVER_NAME,
           version: SERVER_VERSION,
-          apiKey: CONFIG.apiKey || null,
-          hasApiKey: !!CONFIG.apiKey,
-          storage: status
+          protocolVersion: PROTOCOL_VERSION,
+          storageMode: CONFIG.storageMode,
+          apiKey: CONFIG.apiKey,
+          serverUrl: `http://localhost:${CONFIG.healthPort}`
         };
         res.writeHead(200, {
           "Content-Type": "application/json",
@@ -1330,6 +1362,49 @@ if (CONFIG.healthPort > 0) {
       }
     }
 
+    if (route === "/api/regenerate-api-key" && req.method === "POST") {
+      try {
+        const newApiKey = randomUUID();
+        const apiKeyFile = path.join(CONFIG.dataDir, API_KEY_FILE);
+        
+        // Save new API key
+        try {
+          if (!fs.existsSync(CONFIG.dataDir)) {
+            fs.mkdirSync(CONFIG.dataDir, { recursive: true });
+          }
+          fs.writeFileSync(apiKeyFile, newApiKey, { mode: 0o600 });
+          CONFIG.apiKey = newApiKey;
+          writeLog("info", "Regenerated API key", { file: apiKeyFile });
+        } catch (e) {
+          writeLog("warn", "Failed to save regenerated API key", { error: e.message });
+        }
+        
+        const payload = {
+          ok: true,
+          apiKey: newApiKey
+        };
+        res.writeHead(200, {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type"
+        });
+        res.end(JSON.stringify(payload));
+        return;
+      } catch (error) {
+        res.writeHead(500, {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        });
+        res.end(JSON.stringify({
+          ok: false,
+          error: "regenerate_api_key_error",
+          message: error instanceof Error ? error.message : "Failed to regenerate API key"
+        }));
+        return;
+      }
+    }
+
     if (tryServeWebUi(req, res)) {
       return;
     }
@@ -1347,6 +1422,20 @@ if (CONFIG.healthPort > 0) {
     writeLog("info", "health_endpoint_started", {
       port: CONFIG.healthPort
     });
+  });
+
+  healthServer.on('error', (error) => {
+    writeLog("error", "health_server_error", {
+      port: CONFIG.healthPort,
+      details: error instanceof Error ? error.message : "health server error"
+    });
+    if (error.code === 'EADDRINUSE') {
+      writeLog("error", "health_port_in_use", {
+        port: CONFIG.healthPort,
+        message: `Port ${CONFIG.healthPort} is already in use. Choose a different MEMORYLOOM_HEALTH_PORT.`
+      });
+      process.exit(1);
+    }
   });
 }
 
