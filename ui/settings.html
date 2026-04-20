@@ -6,7 +6,7 @@
   <title>Settings & Setup - MemoryLoom</title>
   <link rel="icon" type="image/png" href="/assets/memoryloom.png" />
   <link rel="apple-touch-icon" href="/assets/memoryloom.png" />
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/styles.css?v=2.2" />
 </head>
 <body>
   <div class="backdrop">
@@ -101,12 +101,13 @@
           <div id="claude-panel" class="tab-panel active">
             <h4>Claude Desktop Setup</h4>
             <p style="color: var(--text-secondary); font-size: 0.9rem;">Config Location:  <code>~/Library/Application Support/Claude/claude_desktop_config.json</code> (macOS)</p>
-            <pre>
+            <div class="code-block-container" style="position: relative;">
               <div class="code-actions" style="position: absolute; top: 8px; right: 8px; display: flex; gap: 8px;">
                 <button class="copy-btn">Copy</button>
                 <button class="download-btn btn-ghost" style="padding: 4px 12px; font-size: 0.8rem;" data-editor="claude">Download</button>
               </div>
-              <code id="claude-config">{
+              <pre>
+                <code id="claude-config">{
   "mcpServers": {
     "memoryloom": {
       "url": "${MCP_URL}",
@@ -117,16 +118,18 @@
   }
 }</code>
             </pre>
+            </div>
           </div>
           <div id="cursor-panel" class="tab-panel ">
             <h4>Cursor IDE Setup</h4>
             <p style="color: var(--text-secondary); font-size: 0.9rem;">Config Location:  Cursor Settings → Extensions → MCP</p>
-            <pre>
+            <div class="code-block-container" style="position: relative;">
               <div class="code-actions" style="position: absolute; top: 8px; right: 8px; display: flex; gap: 8px;">
                 <button class="copy-btn">Copy</button>
                 <button class="download-btn btn-ghost" style="padding: 4px 12px; font-size: 0.8rem;" data-editor="cursor">Download</button>
               </div>
-              <code id="cursor-config">{
+              <pre>
+                <code id="cursor-config">{
   "context_servers": {
     "memoryloom": {
       "url": "${MCP_URL}",
@@ -137,16 +140,18 @@
   }
 }</code>
             </pre>
+            </div>
           </div>
           <div id="vscode-panel" class="tab-panel ">
             <h4>VS Code Setup</h4>
             <p style="color: var(--text-secondary); font-size: 0.9rem;">Config Location:  VS Code Settings → Extensions → GitHub Copilot</p>
-            <pre>
+            <div class="code-block-container" style="position: relative;">
               <div class="code-actions" style="position: absolute; top: 8px; right: 8px; display: flex; gap: 8px;">
                 <button class="copy-btn">Copy</button>
                 <button class="download-btn btn-ghost" style="padding: 4px 12px; font-size: 0.8rem;" data-editor="vscode">Download</button>
               </div>
-              <code id="vscode-config">{
+              <pre>
+                <code id="vscode-config">{
   "github.copilot.mcp.servers": {
     "memoryloom": {
       "url": "${MCP_URL}",
@@ -157,16 +162,18 @@
   }
 }</code>
             </pre>
+            </div>
           </div>
           <div id="windsurf-panel" class="tab-panel ">
             <h4>Windsurf Setup</h4>
             <p style="color: var(--text-secondary); font-size: 0.9rem;">Config Location:  Windsurf Settings → MCP Servers</p>
-            <pre>
+            <div class="code-block-container" style="position: relative;">
               <div class="code-actions" style="position: absolute; top: 8px; right: 8px; display: flex; gap: 8px;">
                 <button class="copy-btn">Copy</button>
                 <button class="download-btn btn-ghost" style="padding: 4px 12px; font-size: 0.8rem;" data-editor="windsurf">Download</button>
               </div>
-              <code id="windsurf-config">{
+              <pre>
+                <code id="windsurf-config">{
   "mcpServers": {
     "memoryloom": {
       "url": "${MCP_URL}",
@@ -177,16 +184,18 @@
   }
 }</code>
             </pre>
+            </div>
           </div>
           <div id="zed-panel" class="tab-panel ">
             <h4>Zed Setup</h4>
             <p style="color: var(--text-secondary); font-size: 0.9rem;">Config Location:  Zed Settings → LSP → Add Server</p>
-            <pre>
+            <div class="code-block-container" style="position: relative;">
               <div class="code-actions" style="position: absolute; top: 8px; right: 8px; display: flex; gap: 8px;">
                 <button class="copy-btn">Copy</button>
                 <button class="download-btn btn-ghost" style="padding: 4px 12px; font-size: 0.8rem;" data-editor="zed">Download</button>
               </div>
-              <code id="zed-config">{
+              <pre>
+                <code id="zed-config">{
   "mcpServers": {
     "memoryloom": {
       "url": "${MCP_URL}",
@@ -197,16 +206,18 @@
   }
 }</code>
             </pre>
+            </div>
           </div>
           <div id="continue-panel" class="tab-panel ">
             <h4>Continue.dev Setup</h4>
             <p style="color: var(--text-secondary); font-size: 0.9rem;">Config Location:  Continue.dev Settings → MCP Servers</p>
-            <pre>
+            <div class="code-block-container" style="position: relative;">
               <div class="code-actions" style="position: absolute; top: 8px; right: 8px; display: flex; gap: 8px;">
                 <button class="copy-btn">Copy</button>
                 <button class="download-btn btn-ghost" style="padding: 4px 12px; font-size: 0.8rem;" data-editor="continue">Download</button>
               </div>
-              <code id="continue-config">{
+              <pre>
+                <code id="continue-config">{
   "mcpServers": {
     "memoryloom": {
       "url": "${MCP_URL}",
@@ -217,16 +228,18 @@
   }
 }</code>
             </pre>
+            </div>
           </div>
           <div id="aider-panel" class="tab-panel ">
             <h4>Aider Setup</h4>
             <p style="color: var(--text-secondary); font-size: 0.9rem;">Config Location:  Aider config file (.aider.conf.yaml)</p>
-            <pre>
+            <div class="code-block-container" style="position: relative;">
               <div class="code-actions" style="position: absolute; top: 8px; right: 8px; display: flex; gap: 8px;">
                 <button class="copy-btn">Copy</button>
                 <button class="download-btn btn-ghost" style="padding: 4px 12px; font-size: 0.8rem;" data-editor="aider">Download</button>
               </div>
-              <code id="aider-config">{
+              <pre>
+                <code id="aider-config">{
   "mcpServers": {
     "memoryloom": {
       "url": "${MCP_URL}",
@@ -237,16 +250,18 @@
   }
 }</code>
             </pre>
+            </div>
           </div>
           <div id="jetbrains-panel" class="tab-panel ">
             <h4>JetBrains IDEs Setup</h4>
             <p style="color: var(--text-secondary); font-size: 0.9rem;">Config Location:  JetBrains Settings → Tools → MCP Servers</p>
-            <pre>
+            <div class="code-block-container" style="position: relative;">
               <div class="code-actions" style="position: absolute; top: 8px; right: 8px; display: flex; gap: 8px;">
                 <button class="copy-btn">Copy</button>
                 <button class="download-btn btn-ghost" style="padding: 4px 12px; font-size: 0.8rem;" data-editor="jetbrains">Download</button>
               </div>
-              <code id="jetbrains-config">{
+              <pre>
+                <code id="jetbrains-config">{
   "mcpServers": {
     "memoryloom": {
       "url": "${MCP_URL}",
@@ -257,16 +272,18 @@
   }
 }</code>
             </pre>
+            </div>
           </div>
           <div id="codeium-panel" class="tab-panel ">
             <h4>Codeium Setup</h4>
             <p style="color: var(--text-secondary); font-size: 0.9rem;">Config Location:  Codeium Settings → MCP Servers</p>
-            <pre>
+            <div class="code-block-container" style="position: relative;">
               <div class="code-actions" style="position: absolute; top: 8px; right: 8px; display: flex; gap: 8px;">
                 <button class="copy-btn">Copy</button>
                 <button class="download-btn btn-ghost" style="padding: 4px 12px; font-size: 0.8rem;" data-editor="codeium">Download</button>
               </div>
-              <code id="codeium-config">{
+              <pre>
+                <code id="codeium-config">{
   "mcpServers": {
     "memoryloom": {
       "url": "${MCP_URL}",
@@ -277,16 +294,18 @@
   }
 }</code>
             </pre>
+            </div>
           </div>
           <div id="tabby-panel" class="tab-panel ">
             <h4>Tabby Setup</h4>
             <p style="color: var(--text-secondary); font-size: 0.9rem;">Config Location:  Tabby Settings → MCP Servers</p>
-            <pre>
+            <div class="code-block-container" style="position: relative;">
               <div class="code-actions" style="position: absolute; top: 8px; right: 8px; display: flex; gap: 8px;">
                 <button class="copy-btn">Copy</button>
                 <button class="download-btn btn-ghost" style="padding: 4px 12px; font-size: 0.8rem;" data-editor="tabby">Download</button>
               </div>
-              <code id="tabby-config">{
+              <pre>
+                <code id="tabby-config">{
   "mcpServers": {
     "memoryloom": {
       "url": "${MCP_URL}",
@@ -297,16 +316,18 @@
   }
 }</code>
             </pre>
+            </div>
           </div>
           <div id="replit-panel" class="tab-panel ">
             <h4>Replit Setup</h4>
             <p style="color: var(--text-secondary); font-size: 0.9rem;">Config Location:  Replit Settings → Tools → MCP</p>
-            <pre>
+            <div class="code-block-container" style="position: relative;">
               <div class="code-actions" style="position: absolute; top: 8px; right: 8px; display: flex; gap: 8px;">
                 <button class="copy-btn">Copy</button>
                 <button class="download-btn btn-ghost" style="padding: 4px 12px; font-size: 0.8rem;" data-editor="replit">Download</button>
               </div>
-              <code id="replit-config">{
+              <pre>
+                <code id="replit-config">{
   "mcpServers": {
     "memoryloom": {
       "url": "${MCP_URL}",
@@ -317,16 +338,18 @@
   }
 }</code>
             </pre>
+            </div>
           </div>
           <div id="cline-panel" class="tab-panel ">
             <h4>Cline Setup (VS Code Extension)</h4>
             <p style="color: var(--text-secondary); font-size: 0.9rem;">Config Location:  VS Code Settings → Cline → MCP Servers</p>
-            <pre>
+            <div class="code-block-container" style="position: relative;">
               <div class="code-actions" style="position: absolute; top: 8px; right: 8px; display: flex; gap: 8px;">
                 <button class="copy-btn">Copy</button>
                 <button class="download-btn btn-ghost" style="padding: 4px 12px; font-size: 0.8rem;" data-editor="cline">Download</button>
               </div>
-              <code id="cline-config">{
+              <pre>
+                <code id="cline-config">{
   "mcpServers": {
     "memoryloom": {
       "url": "${MCP_URL}",
@@ -337,16 +360,18 @@
   }
 }</code>
             </pre>
+            </div>
           </div>
           <div id="roocode-panel" class="tab-panel ">
             <h4>Roo Code Setup</h4>
             <p style="color: var(--text-secondary); font-size: 0.9rem;">Config Location:  Roo Code Settings → MCP Servers</p>
-            <pre>
+            <div class="code-block-container" style="position: relative;">
               <div class="code-actions" style="position: absolute; top: 8px; right: 8px; display: flex; gap: 8px;">
                 <button class="copy-btn">Copy</button>
                 <button class="download-btn btn-ghost" style="padding: 4px 12px; font-size: 0.8rem;" data-editor="roocode">Download</button>
               </div>
-              <code id="roocode-config">{
+              <pre>
+                <code id="roocode-config">{
   "mcpServers": {
     "memoryloom": {
       "url": "${MCP_URL}",
@@ -357,16 +382,18 @@
   }
 }</code>
             </pre>
+            </div>
           </div>
           <div id="local-panel" class="tab-panel ">
             <h4>HTTP MCP Setup</h4>
             <p style="color: var(--text-secondary); font-size: 0.9rem;">Config Location:  <strong>HTTP MCP:</strong> Connect directly to this server without running anything locally. Works for all MCP-compatible editors.</p>
-            <pre>
+            <div class="code-block-container" style="position: relative;">
               <div class="code-actions" style="position: absolute; top: 8px; right: 8px; display: flex; gap: 8px;">
                 <button class="copy-btn">Copy</button>
                 <button class="download-btn btn-ghost" style="padding: 4px 12px; font-size: 0.8rem;" data-editor="local">Download</button>
               </div>
-              <code id="local-setup">{
+              <pre>
+                <code id="local-setup">{
   "mcpServers": {
     "memoryloom": {
       "url": "${MCP_URL}",
@@ -377,16 +404,18 @@
   }
 }</code>
             </pre>
+            </div>
           </div>
           <div id="gemini-vscode-panel" class="tab-panel ">
             <h4>Gemini Code Assist (VS Code) Setup</h4>
             <p style="color: var(--text-secondary); font-size: 0.9rem;">Config Location:  <code>~/.gemini/settings.json</code></p>
-            <pre>
+            <div class="code-block-container" style="position: relative;">
               <div class="code-actions" style="position: absolute; top: 8px; right: 8px; display: flex; gap: 8px;">
                 <button class="copy-btn">Copy</button>
                 <button class="download-btn btn-ghost" style="padding: 4px 12px; font-size: 0.8rem;" data-editor="gemini-vscode">Download</button>
               </div>
-              <code id="gemini-vscode-config">{
+              <pre>
+                <code id="gemini-vscode-config">{
   "mcpServers": {
     "memoryloom": {
       "url": "${MCP_URL}",
@@ -397,16 +426,18 @@
   }
 }</code>
             </pre>
+            </div>
           </div>
           <div id="claude-cli-panel" class="tab-panel ">
             <h4>Claude CLI Setup</h4>
             <p style="color: var(--text-secondary); font-size: 0.9rem;">Config Location:  <code>~/.claude.json</code> (local scope) or <code>.mcp.json</code> (project scope)</p>
-            <pre>
+            <div class="code-block-container" style="position: relative;">
               <div class="code-actions" style="position: absolute; top: 8px; right: 8px; display: flex; gap: 8px;">
                 <button class="copy-btn">Copy</button>
                 <button class="download-btn btn-ghost" style="padding: 4px 12px; font-size: 0.8rem;" data-editor="claude-cli">Download</button>
               </div>
-              <code id="claude-cli-config">{
+              <pre>
+                <code id="claude-cli-config">{
   "mcpServers": {
     "memoryloom": {
       "url": "${MCP_URL}",
@@ -417,16 +448,18 @@
   }
 }</code>
             </pre>
+            </div>
           </div>
           <div id="gemini-cli-panel" class="tab-panel ">
             <h4>Gemini CLI Setup</h4>
             <p style="color: var(--text-secondary); font-size: 0.9rem;">Config Location:  <code>~/.gemini/settings.json</code></p>
-            <pre>
+            <div class="code-block-container" style="position: relative;">
               <div class="code-actions" style="position: absolute; top: 8px; right: 8px; display: flex; gap: 8px;">
                 <button class="copy-btn">Copy</button>
                 <button class="download-btn btn-ghost" style="padding: 4px 12px; font-size: 0.8rem;" data-editor="gemini-cli">Download</button>
               </div>
-              <code id="gemini-cli-config">{
+              <pre>
+                <code id="gemini-cli-config">{
   "mcpServers": {
     "memoryloom": {
       "url": "${MCP_URL}",
@@ -437,16 +470,18 @@
   }
 }</code>
             </pre>
+            </div>
           </div>
           <div id="kiro-panel" class="tab-panel ">
             <h4>Kiro Setup</h4>
             <p style="color: var(--text-secondary); font-size: 0.9rem;">Config Location:  <code>~/.kiro/settings/mcp.json</code> (user level) or <code>.kiro/settings/mcp.json</code> (workspace level)</p>
-            <pre>
+            <div class="code-block-container" style="position: relative;">
               <div class="code-actions" style="position: absolute; top: 8px; right: 8px; display: flex; gap: 8px;">
                 <button class="copy-btn">Copy</button>
                 <button class="download-btn btn-ghost" style="padding: 4px 12px; font-size: 0.8rem;" data-editor="kiro">Download</button>
               </div>
-              <code id="kiro-config">{
+              <pre>
+                <code id="kiro-config">{
   "mcpServers": {
     "memoryloom": {
       "url": "${MCP_URL}",
@@ -457,16 +492,18 @@
   }
 }</code>
             </pre>
+            </div>
           </div>
           <div id="antigravity-panel" class="tab-panel ">
             <h4>Antigravity Setup</h4>
             <p style="color: var(--text-secondary); font-size: 0.9rem;">Config Location:  <code>~/.gemini/antigravity/mcp_config.json</code></p>
-            <pre>
+            <div class="code-block-container" style="position: relative;">
               <div class="code-actions" style="position: absolute; top: 8px; right: 8px; display: flex; gap: 8px;">
                 <button class="copy-btn">Copy</button>
                 <button class="download-btn btn-ghost" style="padding: 4px 12px; font-size: 0.8rem;" data-editor="antigravity">Download</button>
               </div>
-              <code id="antigravity-config">{
+              <pre>
+                <code id="antigravity-config">{
   "mcpServers": {
     "memoryloom": {
       "url": "${MCP_URL}",
@@ -477,6 +514,7 @@
   }
 }</code>
             </pre>
+            </div>
           </div>
 </div>
 </div>
