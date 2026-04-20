@@ -1298,9 +1298,7 @@ if (CONFIG.healthPort > 0) {
     }
     
     if (route === "/health" || route === "/ready") {
-      if (!checkAuth(req, res)) {
-        return;
-      }
+      // Health check endpoints are public (no auth required) for deployment platforms
       try {
         const status = await store.status();
         const payload = {
