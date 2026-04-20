@@ -957,47 +957,45 @@ h3 {
 /* Memory Management Styles */
 .memory-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
 }
 
 .stat-card {
   background: rgba(10, 26, 31, 0.8);
   border: 1px solid var(--line);
   border-radius: 12px;
-  padding: 20px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  padding: 24px;
+  text-align: center;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .stat-card:hover {
   transform: translateY(-2px);
   border-color: var(--aqua);
-}
-
-.stat-icon {
-  font-size: 2rem;
-  line-height: 1;
+  box-shadow: 0 4px 12px rgba(53, 215, 189, 0.15);
 }
 
 .stat-content {
-  flex: 1;
-}
-
-.stat-value {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: var(--aqua);
-  line-height: 1;
-  margin-bottom: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .stat-label {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--aqua);
+  line-height: 1;
 }
 
 /* Memory Controls */
@@ -1137,18 +1135,20 @@ h3 {
   background: rgba(53, 215, 189, 0.1);
   border: 1px solid var(--aqua);
   color: var(--aqua);
-  padding: 8px 12px;
+  padding: 8px 16px;
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.85rem;
+  font-weight: 600;
   transition: all 0.2s ease;
   min-height: 36px;
-  min-width: 36px;
+  font-family: "Outfit", sans-serif;
 }
 
 .icon-btn:hover {
   background: var(--aqua);
   color: #082226;
+  transform: translateY(-1px);
 }
 
 .icon-btn.danger {
@@ -1160,6 +1160,7 @@ h3 {
 .icon-btn.danger:hover {
   background: var(--error);
   color: white;
+  transform: translateY(-1px);
 }
 
 .memory-card-content {
@@ -1183,7 +1184,13 @@ h3 {
 .memory-card-footer-item {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  font-size: 0.85rem;
+}
+
+.memory-card-footer-item strong {
+  color: var(--aqua);
+  font-weight: 600;
 }
 
 .memory-card-tags {
@@ -1230,14 +1237,13 @@ h3 {
 
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
+  padding: 80px 20px;
   color: var(--muted);
 }
 
-.empty-state-icon {
-  font-size: 3rem;
-  margin-bottom: 16px;
-  opacity: 0.5;
+.empty-state p {
+  font-size: 1.1rem;
+  margin: 0;
 }
 
 /* Form Styles */

@@ -493,15 +493,15 @@ async function checkServerHealth() {
     const healthData = await healthResponse.json();
 
     if (healthData.ok) {
-      updateHealthStatus('server-status', '✅ Online', 'healthy');
+      updateHealthStatus('server-status', 'Online', 'healthy');
       
       // Update memory stats
       await loadMemoryStats();
     } else {
-      updateHealthStatus('server-status', '⚠️ Issues', 'warning');
+      updateHealthStatus('server-status', 'Issues Detected', 'warning');
     }
   } catch (error) {
-    updateHealthStatus('server-status', '❌ Offline', 'error');
+    updateHealthStatus('server-status', 'Offline', 'error');
   }
 }
 
@@ -599,7 +599,6 @@ async function loadMemories(filters = {}) {
     } else {
       memoryList.innerHTML = `
         <div class="empty-state">
-          <div class="empty-state-icon">📝</div>
           <p>No memories found. Add your first memory to get started!</p>
         </div>
       `;
@@ -611,7 +610,6 @@ async function loadMemories(filters = {}) {
     console.error('Failed to load memories:', error);
     memoryList.innerHTML = `
       <div class="empty-state">
-        <div class="empty-state-icon">⚠️</div>
         <p>Failed to load memories: ${error.message}</p>
       </div>
     `;
@@ -644,16 +642,16 @@ function renderMemoryCard(memory) {
           </div>
         </div>
         <div class="memory-card-actions">
-          <button class="icon-btn edit-memory-btn" data-id="${memory.id}" title="Edit">✏️</button>
-          <button class="icon-btn danger delete-memory-btn" data-id="${memory.id}" title="Delete">🗑️</button>
+          <button class="icon-btn edit-memory-btn" data-id="${memory.id}" title="Edit">Edit</button>
+          <button class="icon-btn danger delete-memory-btn" data-id="${memory.id}" title="Delete">Delete</button>
         </div>
       </div>
       <div class="memory-card-content">${escapeHtml(memory.content)}</div>
       <div class="memory-card-footer">
-        <div class="memory-card-footer-item">👤 ${memory.metadata?.user || 'default'}</div>
-        <div class="memory-card-footer-item">📁 ${memory.metadata?.project || 'general'}</div>
-        <div class="memory-card-footer-item">🏷️ ${memory.metadata?.memory_type || 'general'}</div>
-        <div class="memory-card-footer-item">📅 ${formatDate(memory.metadata?.updated_at)}</div>
+        <div class="memory-card-footer-item"><strong>User:</strong> ${memory.metadata?.user || 'default'}</div>
+        <div class="memory-card-footer-item"><strong>Project:</strong> ${memory.metadata?.project || 'general'}</div>
+        <div class="memory-card-footer-item"><strong>Type:</strong> ${memory.metadata?.memory_type || 'general'}</div>
+        <div class="memory-card-footer-item"><strong>Updated:</strong> ${formatDate(memory.metadata?.updated_at)}</div>
       </div>
       ${tagsHtml}
     </div>
@@ -744,7 +742,6 @@ async function searchMemories() {
     } else {
       memoryList.innerHTML = `
         <div class="empty-state">
-          <div class="empty-state-icon">🔍</div>
           <p>No memories found matching "${escapeHtml(query)}"</p>
         </div>
       `;
@@ -753,7 +750,6 @@ async function searchMemories() {
     console.error('Failed to search memories:', error);
     memoryList.innerHTML = `
       <div class="empty-state">
-        <div class="empty-state-icon">⚠️</div>
         <p>Search failed: ${error.message}</p>
       </div>
     `;
