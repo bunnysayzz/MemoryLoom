@@ -387,7 +387,9 @@ function tryServeWebUi(req, res) {
     const body = fs.readFileSync(assetPath);
     res.writeHead(200, {
       "Content-Type": asset.contentType,
-      "Cache-Control": requestPath === "/" ? "no-cache" : "public, max-age=3600"
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0"
     });
     res.end(body);
     return true;
@@ -1284,7 +1286,9 @@ if (CONFIG.healthPort > 0) {
             const body = fs.readFileSync(assetPath);
             res.writeHead(200, {
               "Content-Type": asset.contentType,
-              "Cache-Control": route === "/" ? "no-cache" : "public, max-age=3600"
+              "Cache-Control": "no-cache, no-store, must-revalidate",
+              "Pragma": "no-cache",
+              "Expires": "0"
             });
             res.end(body);
             return;
