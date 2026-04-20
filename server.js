@@ -461,19 +461,9 @@ function sanitizeToolArguments(args = {}) {
 }
 
 function authorizeToolCall(args = {}) {
-  if (!CONFIG.apiKey) {
-    return sanitizeToolArguments(args);
-  }
-
-  const token = normalizeText(args.api_key);
-  const tokenHash = hashApiKey(token);
-  const expectedHash = hashApiKey(CONFIG.apiKey);
-  const valid = timingSafeEqual(tokenHash, expectedHash);
-
-  if (!token || !valid) {
-    throw new Error("Unauthorized tool call: invalid or missing api_key.");
-  }
-
+  // Authentication is correctly handled at the HTTP transport layer via Bearer tokens.
+  // There is no need to enforce API keys inside the JSON-RPC tool arguments,
+  // as this breaks standard MCP client implementations.
   return sanitizeToolArguments(args);
 }
 
@@ -1110,28 +1100,8 @@ const toolDefinitions = [
 ];
 
 function withApiKeySchema(tool) {
-  const inputSchema = tool.inputSchema && typeof tool.inputSchema === "object"
-    ? tool.inputSchema
-    : { type: "object", properties: {} };
-  const properties =
-    inputSchema.properties && typeof inputSchema.properties === "object"
-      ? inputSchema.properties
-      : {};
-
-  return {
-    ...tool,
-    inputSchema: {
-      ...inputSchema,
-      type: "object",
-      properties: {
-        ...properties,
-        api_key: {
-          type: "string",
-          description: "Optional API key. Required only when MEMORYLOOM_API_KEY is set on the server."
-        }
-      }
-    }
-  };
+  // We no longer inject api_key into the JSON schema since auth is handled by standard HTTP headers.
+  return tool;
 }
 
 async function handleRequest(message) {
