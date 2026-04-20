@@ -615,6 +615,23 @@ select.form-control {
   border-right: 1px solid var(--glass-border);
   display: flex;
   flex-direction: column;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Custom Scrollbar for tab list */
+.tab-list::-webkit-scrollbar {
+  width: 6px;
+}
+.tab-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.tab-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+.tab-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .tab-btn {
@@ -665,6 +682,7 @@ pre {
   border: 1px solid var(--glass-border);
   border-radius: var(--border-radius-sm);
   padding: 16px;
+  padding-top: 48px; /* Give space for absolute buttons */
   overflow-x: auto;
   font-family: 'Space Grotesk', monospace;
   font-size: 0.85rem;
@@ -673,10 +691,24 @@ pre {
   position: relative;
 }
 
+/* Button styles that sit in the code actions */
+.code-actions button {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+}
+
+.code-actions button:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+/* Ensure copy-btn styling works if used outside code-actions */
 .copy-btn {
-  position: absolute;
-  top: 8px;
-  right: 8px;
   background: rgba(255,255,255,0.1);
   border: none;
   color: #fff;
@@ -684,6 +716,7 @@ pre {
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.8rem;
+  transition: all 0.2s ease;
 }
 
 .copy-btn:hover {
@@ -772,6 +805,8 @@ pre {
     border-bottom: 1px solid var(--glass-border);
     flex-direction: row;
     overflow-x: auto;
+    overflow-y: hidden;
+    max-height: none;
   }
   
   .tab-btn {
