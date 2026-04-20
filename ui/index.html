@@ -3,12 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MemoryLoom | Your Memory Server is Ready</title>
+    <title>MemoryLoom</title>
     <meta
       name="description"
-      content="MemoryLoom memory server is running. Learn how to connect your editors and start using persistent AI memory."
+      content="MemoryLoom - Persistent AI memory server for your editors and tools."
     />
     <link rel="icon" type="image/png" href="/assets/memoryloom.png" />
+    <link rel="apple-touch-icon" href="/assets/memoryloom.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -353,7 +354,10 @@
             <h3>HTTP MCP Setup</h3>
             <p>MemoryLoom is running and ready to connect via HTTP MCP:</p>
             <div class="code-block">
-              <button class="copy-btn" data-target="local-setup" aria-label="Copy HTTP MCP configuration to clipboard">Copy</button>
+              <div class="button-container">
+                <button class="copy-btn" data-target="local-setup" aria-label="Copy HTTP MCP configuration to clipboard">Copy</button>
+                <button id="download-local" class="btn ghost" aria-label="Download HTTP MCP configuration file">Download</button>
+              </div>
               <pre id="local-setup">{
   "mcpServers": {
     "memoryloom": {
@@ -372,7 +376,10 @@
             <h3>Gemini Code Assist (VS Code) Setup</h3>
             <p>Add this to your Gemini settings file:</p>
             <div class="code-block">
-              <button class="copy-btn" data-target="gemini-vscode-config" aria-label="Copy Gemini Code Assist configuration to clipboard">Copy</button>
+              <div class="button-container">
+                <button class="copy-btn" data-target="gemini-vscode-config" aria-label="Copy Gemini Code Assist configuration to clipboard">Copy</button>
+                <button id="download-gemini-vscode" class="btn ghost" aria-label="Download Gemini Code Assist configuration file">Download</button>
+              </div>
               <pre id="gemini-vscode-config">{
   "mcpServers": {
     "memoryloom": {
@@ -391,7 +398,10 @@
             <h3>Claude CLI Setup</h3>
             <p>Add this to your Claude CLI configuration:</p>
             <div class="code-block">
-              <button class="copy-btn" data-target="claude-cli-config" aria-label="Copy Claude CLI configuration to clipboard">Copy</button>
+              <div class="button-container">
+                <button class="copy-btn" data-target="claude-cli-config" aria-label="Copy Claude CLI configuration to clipboard">Copy</button>
+                <button id="download-claude-cli" class="btn ghost" aria-label="Download Claude CLI configuration file">Download</button>
+              </div>
               <pre id="claude-cli-config">{
   "mcpServers": {
     "memoryloom": {
@@ -410,7 +420,10 @@
             <h3>Gemini CLI Setup</h3>
             <p>Add this to your Gemini CLI settings file:</p>
             <div class="code-block">
-              <button class="copy-btn" data-target="gemini-cli-config" aria-label="Copy Gemini CLI configuration to clipboard">Copy</button>
+              <div class="button-container">
+                <button class="copy-btn" data-target="gemini-cli-config" aria-label="Copy Gemini CLI configuration to clipboard">Copy</button>
+                <button id="download-gemini-cli" class="btn ghost" aria-label="Download Gemini CLI configuration file">Download</button>
+              </div>
               <pre id="gemini-cli-config">{
   "mcpServers": {
     "memoryloom": {
@@ -429,7 +442,10 @@
             <h3>Kiro Setup</h3>
             <p>Add this to your Kiro MCP configuration file:</p>
             <div class="code-block">
-              <button class="copy-btn" data-target="kiro-config" aria-label="Copy Kiro configuration to clipboard">Copy</button>
+              <div class="button-container">
+                <button class="copy-btn" data-target="kiro-config" aria-label="Copy Kiro configuration to clipboard">Copy</button>
+                <button id="download-kiro" class="btn ghost" aria-label="Download Kiro configuration file">Download</button>
+              </div>
               <pre id="kiro-config">{
   "mcpServers": {
     "memoryloom": {
@@ -448,7 +464,10 @@
             <h3>Antigravity Setup</h3>
             <p>Add this to your Antigravity MCP configuration file:</p>
             <div class="code-block">
-              <button class="copy-btn" data-target="antigravity-config" aria-label="Copy Antigravity configuration to clipboard">Copy</button>
+              <div class="button-container">
+                <button class="copy-btn" data-target="antigravity-config" aria-label="Copy Antigravity configuration to clipboard">Copy</button>
+                <button id="download-antigravity" class="btn ghost" aria-label="Download Antigravity configuration file">Download</button>
+              </div>
               <pre id="antigravity-config">{
   "mcpServers": {
     "memoryloom": {
@@ -522,6 +541,71 @@
       </section>
 
       <section id="health" class="panel reveal">
+        <h2>Memory Management</h2>
+        
+        <!-- Memory Stats Overview -->
+        <div class="memory-stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-content">
+              <div class="stat-value" id="total-memories">0</div>
+              <div class="stat-label">Total Memories</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-content">
+              <div class="stat-value" id="active-memories">0</div>
+              <div class="stat-label">Active</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📦</div>
+            <div class="stat-content">
+              <div class="stat-value" id="archived-memories">0</div>
+              <div class="stat-label">Archived</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">💾</div>
+            <div class="stat-content">
+              <div class="stat-value" id="storage-mode-display">JSON</div>
+              <div class="stat-label">Storage Mode</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Memory Controls -->
+        <div class="memory-controls">
+          <div class="search-box">
+            <input type="text" id="memory-search" placeholder="Search memories..." />
+            <button class="btn primary" id="search-btn">🔍 Search</button>
+          </div>
+          <div class="filter-controls">
+            <select id="filter-project" class="filter-select">
+              <option value="">All Projects</option>
+            </select>
+            <select id="filter-user" class="filter-select">
+              <option value="">All Users</option>
+            </select>
+            <select id="filter-type" class="filter-select">
+              <option value="">All Types</option>
+            </select>
+            <button class="btn ghost" id="refresh-memories">🔄 Refresh</button>
+            <button class="btn primary" id="add-memory-btn">➕ Add Memory</button>
+          </div>
+        </div>
+
+        <!-- Memory List -->
+        <div id="memory-list" class="memory-list">
+          <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading memories...</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="health-status" class="panel reveal">
         <h2>Server Health</h2>
         <div class="health-grid">
           <div class="health-card">
@@ -531,22 +615,11 @@
             </div>
           </div>
           <div class="health-card">
-            <h3>Memory Count</h3>
-            <div class="health-status" id="memory-count">
-              <span class="loading">Loading...</span>
-            </div>
-          </div>
-          <div class="health-card">
-            <h3>Storage Mode</h3>
-            <div class="health-status" id="storage-mode">
-              <span class="loading">Loading...</span>
-            </div>
-          </div>
-          <div class="health-card">
             <h3>API Endpoints</h3>
             <div class="health-status">
               <a href="/health" target="_blank">/health</a>
               <a href="/ready" target="_blank">/ready</a>
+              <a href="/mcp" target="_blank">/mcp</a>
             </div>
           </div>
         </div>
@@ -554,8 +627,21 @@
     </main>
 
     <footer class="footer reveal">
-      <p>MemoryLoom Server</p>
-      <p>Persistent AI memory is now active at <span id="footer-url"></span></p>
+      <div class="footer-content">
+        <p>MemoryLoom</p>
+        <div class="footer-links">
+          <a href="https://github.com/bunnysayzz/MemoryLoom" target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+          </a>
+          <a href="https://macbunny.co/" target="_blank" rel="noopener noreferrer" aria-label="MacBunny">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
     </footer>
 
     <!-- Settings Modal -->
@@ -579,6 +665,98 @@
               <p class="warning">Regenerating your API key will invalidate all existing configurations. You'll need to update your editor configs with the new key.</p>
               <button class="btn danger" id="settings-regenerate-api-key" aria-label="Regenerate API key">Regenerate API Key</button>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add/Edit Memory Modal -->
+    <div id="memory-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="memory-modal-title">Add Memory</h2>
+          <button class="modal-close" id="close-memory-modal" aria-label="Close Memory Modal">×</button>
+        </div>
+        <div class="modal-body">
+          <form id="memory-form">
+            <input type="hidden" id="memory-id" />
+            
+            <div class="form-group">
+              <label for="memory-content">Content *</label>
+              <textarea id="memory-content" rows="4" required placeholder="Enter memory content..."></textarea>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="memory-importance">Importance</label>
+                <input type="number" id="memory-importance" min="0" max="1" step="0.1" value="0.5" />
+              </div>
+              
+              <div class="form-group">
+                <label for="memory-confidence">Confidence</label>
+                <input type="number" id="memory-confidence" min="0" max="1" step="0.1" value="1" />
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="memory-user">User</label>
+                <input type="text" id="memory-user" placeholder="default" />
+              </div>
+              
+              <div class="form-group">
+                <label for="memory-project">Project</label>
+                <input type="text" id="memory-project" placeholder="general" />
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="memory-type">Type</label>
+                <input type="text" id="memory-type" placeholder="general" />
+              </div>
+              
+              <div class="form-group">
+                <label for="memory-source">Source</label>
+                <input type="text" id="memory-source" placeholder="manual" />
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="memory-tags">Tags (comma-separated)</label>
+              <input type="text" id="memory-tags" placeholder="tag1, tag2, tag3" />
+            </div>
+            
+            <div class="form-actions">
+              <button type="button" class="btn ghost" id="cancel-memory">Cancel</button>
+              <button type="submit" class="btn primary" id="save-memory">Save Memory</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="modal modal-small" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Delete Memory</h2>
+          <button class="modal-close" id="close-delete-modal" aria-label="Close Delete Modal">×</button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete this memory?</p>
+          <input type="hidden" id="delete-memory-id" />
+          
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="hard-delete-checkbox" />
+              <span>Permanently delete (cannot be undone)</span>
+            </label>
+          </div>
+          
+          <div class="form-actions">
+            <button type="button" class="btn ghost" id="cancel-delete">Cancel</button>
+            <button type="button" class="btn danger" id="confirm-delete">Delete</button>
           </div>
         </div>
       </div>

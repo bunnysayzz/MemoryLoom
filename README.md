@@ -11,27 +11,29 @@ MemoryLoom supports **two connection modes**:
 - **stdio MCP** (Local only) - Traditional MCP over stdin/stdout for local development
 - **HTTP MCP** (Local or Remote) - MCP over HTTP for remote deployments
 
-[![Deploy to Railway](https://img.shields.io/badge/Deploy-Railway-0B0D0E?logo=railway&logoColor=white)](https://railway.app/new/template?template=https://github.com/bunnysayzz/memoryloom)
-[![Deploy to Fly.io](https://img.shields.io/badge/Deploy-Fly.io-8B5CF6?logo=flydotio&logoColor=white)](https://fly.io/docs/launch/deploy/)
-[![Deploy to Vercel](https://img.shields.io/badge/Deploy-Vercel-000000?logo=vercel&logoColor=white)](https://vercel.com/new/clone?repository-url=https://github.com/bunnysayzz/memoryloom)
-[![Deploy to Netlify](https://img.shields.io/badge/Deploy-Netlify-00C7B7?logo=netlify&logoColor=white)](https://app.netlify.com/start/deploy?repository=https://github.com/bunnysayzz/memoryloom)
+**📖 [HTTP MCP Connection Guide](HTTP_MCP_GUIDE.md)** - Connect to remote MemoryLoom instances
 
-### 💳 Free Tier (Credit Card Required for Verification)
-
-[![Deploy to Heroku](https://img.shields.io/badge/Deploy-Heroku-430098?logo=heroku&logoColor=white)](https://heroku.com/deploy?template=https://github.com/bunnysayzz/memoryloom)
-[![Deploy to Render](https://img.shields.io/badge/Deploy-Render-46E3B7?logo=render&logoColor=black)](https://render.com/deploy?repo=https://github.com/bunnysayzz/memoryloom)
-[![Deploy to Koyeb](https://img.shields.io/badge/Deploy-Koyeb-121212?logo=koyeb&logoColor=white)](https://app.koyeb.com/deploy?type=git&repository=https://github.com/bunnysayzz/memoryloom)
-
-### 💰 Paid Platforms
-
-[![Deploy to DigitalOcean](https://img.shields.io/badge/Deploy-DigitalOcean-0080FF?logo=digitalocean&logoColor=white)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/bunnysayzz/memoryloom/tree/main)
-[![Deploy to Google Cloud](https://img.shields.io/badge/Deploy-Google%20Cloud-4285F4?logo=googlecloud&logoColor=white)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/bunnysayzz/memoryloom)
-[![Deploy to Azure](https://img.shields.io/badge/Deploy-Azure-0078D4?logo=microsoftazure&logoColor=white)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fbunnysayzz%2Fmemoryloom%2Fmain%2Fazure-deploy.json)
+<p align="center">
+  <a href="https://railway.app/new/template?template=https://github.com/bunnysayzz/memoryloom"><img src="https://img.shields.io/badge/Deploy-Railway-0B0D0E?style=for-the-badge&logo=railway&logoColor=white&logoSize=auto" height="40" alt="Deploy to Railway"/></a>
+  <a href="https://fly.io/docs/launch/deploy/"><img src="https://img.shields.io/badge/Deploy-Fly.io-8B5CF6?style=for-the-badge&logo=flydotio&logoColor=white&logoSize=auto" height="40" alt="Deploy to Fly.io"/></a>
+  <a href="https://heroku.com/deploy?template=https://github.com/bunnysayzz/memoryloom"><img src="https://img.shields.io/badge/Deploy-Heroku-430098?style=for-the-badge&logo=heroku&logoColor=white&logoSize=auto" height="40" alt="Deploy to Heroku"/></a>
+  <a href="https://render.com/deploy?repo=https://github.com/bunnysayzz/memoryloom"><img src="https://img.shields.io/badge/Deploy-Render-46E3B7?style=for-the-badge&logo=render&logoColor=black&logoSize=auto" height="40" alt="Deploy to Render"/></a>
+  <a href="https://vercel.com/new/clone?repository-url=https://github.com/bunnysayzz/memoryloom"><img src="https://img.shields.io/badge/Deploy-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white&logoSize=auto" height="40" alt="Deploy to Vercel"/></a>
+  <a href="https://app.netlify.com/start/deploy?repository=https://github.com/bunnysayzz/memoryloom"><img src="https://img.shields.io/badge/Deploy-Netlify-00C7B7?style=for-the-badge&logo=netlify&logoColor=white&logoSize=auto" height="40" alt="Deploy to Netlify"/></a>
+  <a href="https://app.koyeb.com/deploy?type=git&repository=https://github.com/bunnysayzz/memoryloom"><img src="https://img.shields.io/badge/Deploy-Koyeb-121212?style=for-the-badge&logo=koyeb&logoColor=white&logoSize=auto" height="40" alt="Deploy to Koyeb"/></a>
+  <a href="https://cloud.digitalocean.com/apps/new?repo=https://github.com/bunnysayzz/memoryloom/tree/main"><img src="https://img.shields.io/badge/Deploy-DigitalOcean-0080FF?style=for-the-badge&logo=digitalocean&logoColor=white&logoSize=auto" height="40" alt="Deploy to DigitalOcean"/></a>
+  <a href="https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/bunnysayzz/memoryloom"><img src="https://img.shields.io/badge/Deploy-Google%20Cloud-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white&logoSize=auto" height="40" alt="Deploy to Google Cloud"/></a>
+  <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fbunnysayzz%2Fmemoryloom%2Fmain%2Fazure-deploy.json"><img src="https://img.shields.io/badge/Deploy-Azure-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white&logoSize=auto" height="40" alt="Deploy to Azure"/></a>
+</p>
 
 **💡 Recommendation:** 
 - **Local development**: Use stdio MCP with `node server.js` 
-- **Remote/Team use**: Deploy to **Railway** or **Fly.io** and use HTTP MCP
+- **Remote/Team use**: Deploy to Railway, Fly.io, Heroku, or Render and use HTTP MCP
 - **Full MCP support**: Avoid serverless platforms (Vercel, Netlify) - they don't support persistent connections
+
+**📖 Deployment Guides:**
+- [No Credit Card Deploy Guide](NO_CREDIT_CARD_DEPLOY.md) - Railway & Fly.io
+- [Complete Deployment Guide](DEPLOYMENT_GUIDE.md) - All platforms
 
 ---
 
@@ -39,10 +41,13 @@ MemoryLoom supports **two connection modes**:
 
 **[📑 Complete Documentation Index](DOCUMENTATION_INDEX.md)** - Navigate all documentation
 
+- **[HTTP MCP Connection Guide](HTTP_MCP_GUIDE.md)** - Connect to remote MemoryLoom instances (Heroku, Railway, etc.)
 - **[Editor Setup Guide](EDITOR_SETUP.md)** - Step-by-step configuration for Claude Desktop, Cursor, VS Code, Windsurf, and Zed
 - **[Deployment Guide](DEPLOYMENT_GUIDE.md)** - Deploy to 10+ platforms with one-click or manual setup
+- **[No Credit Card Deploy](NO_CREDIT_CARD_DEPLOY.md)** - Deploy to Railway or Fly.io without credit card
 - **[Quick Reference Card](QUICK_REFERENCE.md)** - Printable cheat sheet with config locations, commands, and troubleshooting
 - **[Troubleshooting Guide](TROUBLESHOOTING.md)** - Comprehensive solutions for common issues across all editors
+- **[Migration Guide](MIGRATION_GUIDE.md)** - Migrate from other memory servers, switch storage modes, team setup
 - **API Documentation** (MemoryLoom_Documentation.txt) - Complete API reference, tool schemas, and usage examples
 - **[Quick Start](#quick-start)** - Get running in 2 minutes
 

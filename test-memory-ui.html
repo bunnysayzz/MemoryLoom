@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Memory UI Integration</title>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #0a0e10; color: #f4f7f7; }
+    button { padding: 10px 20px; margin: 10px; cursor: pointer; }
+    pre { background: #1a2428; padding: 15px; border-radius: 8px; overflow-x: auto; }
+    .success { color: #35d7bd; }
+    .error { color: #ff6b6b; }
+  </style>
+</head>
+<body>
+  <h1>MemoryLoom Backend Integration Test</h1>
+  
+  <h2>Test 1: Add Memory</h2>
+  <button onclick="testAddMemory()">Add Test Memory</button>
+  <pre id="add-result"></pre>
+  
+  <h2>Test 2: List Memories</h2>
+  <button onclick="testListMemories()">List All Memories</button>
+  <pre id="list-result"></pre>
+  
+  <h2>Test 3: Search Memories</h2>
+  <button onclick="testSearchMemories()">Search Memories</button>
+  <pre id="search-result"></pre>
+  
+  <h2>Test 4: Update Memory</h2>
+  <button onclick="testUpdateMemory()">Update Memory</button>
+  <pre id="update-result"></pre>
+  
+  <h2>Test 5: Delete Memory</h2>
+  <button onclick="testDeleteMemory()">Delete Memory</button>
+  <pre id="delete-result"></pre>
+  
+  <h2>Test 6: Memory Stats</h2>
+  <button onclick="testMemoryStats()">Get Stats</button>
+  <pre id="stats-result"></pre>
+
+  <script>
+    const API_URL = 'http://localhost:8080';
+    let testMemoryId = null;
+    let apiKey = null;
+
+    async function getApiKey() {
+      if (apiKey) return apiKey;
+      const response = await fetch(`${API_URL}/api/setup-info`);
+      const data = await response.json();
+      apiKey = data.apiKey;
+      return apiKey;
+    }
+
+    async function callMcpTool(toolName, args = {}) {
+      const key = await getApiKey();
+      const response = await fetch(`${API_URL}/mcp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${key}`
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: Date.now(),
+          method: 'tools/call',
+          params: {
+            name: toolName,
+            arguments: args
+          }
+        })
+      });
+      
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error.message);
+      }
+      
+      if (data.result && data.result.content && data.result.content[0]) {
+        return JSON.parse(data.result.content[0].text);
+      }
+      return data.result;
+    }
+
+    async function testAddMemory() {
+      const result = document.getElementById('add-result');
+      try {
+        result.textContent = 'Adding memory...';
+        const response = await callMcpTool('add_memory', {
+          content: 'Test memory from UI integration test',
+          importance: 0.8,
+          metadata: {
+            user: 'test-user',
+            project: 'test-project',
+            memory_type: 'test',
+            tags: ['test', 'integration']
+          }
+        });
+        testMemoryId = response.memory.id;
+        result.className = 'success';
+        result.textContent = JSON.stringify(response, null, 2);
+      } catch (error) {
+        result.className = 'error';
+        result.textContent = 'Error: ' + error.message;
+      }
+    }
+
+    async function testListMemories() {
+      const result = document.getElementById('list-result');
+      try {
+        result.textContent = 'Listing memories...';
+        const response = await callMcpTool('list_memories', {
+          limit: 10,
+          sort: 'updated_desc'
+        });
+        result.className = 'success';
+        result.textContent = JSON.stringify(response, null, 2);
+      } catch (error) {
+        result.className = 'error';
+        result.textContent = 'Error: ' + error.message;
+      }
+    }
+
+    async function testSearchMemories() {
+      const result = document.getElementById('search-result');
+      try {
+        result.textContent = 'Searching memories...';
+        const response = await callMcpTool('search_memories', {
+          query: 'test integration',
+          limit: 5
+        });
+        result.className = 'success';
+        result.textContent = JSON.stringify(response, null, 2);
+      } catch (error) {
+        result.className = 'error';
+        result.textContent = 'Error: ' + error.message;
+      }
+    }
+
+    async function testUpdateMemory() {
+      const result = document.getElementById('update-result');
+      if (!testMemoryId) {
+        result.className = 'error';
+        result.textContent = 'Error: Please add a memory first';
+        return;
+      }
+      try {
+        result.textContent = 'Updating memory...';
+        const response = await callMcpTool('update_memory', {
+          id: testMemoryId,
+          content: 'Updated test memory content',
+          importance: 0.9
+        });
+        result.className = 'success';
+        result.textContent = JSON.stringify(response, null, 2);
+      } catch (error) {
+        result.className = 'error';
+        result.textContent = 'Error: ' + error.message;
+      }
+    }
+
+    async function testDeleteMemory() {
+      const result = document.getElementById('delete-result');
+      if (!testMemoryId) {
+        result.className = 'error';
+        result.textContent = 'Error: Please add a memory first';
+        return;
+      }
+      try {
+        result.textContent = 'Deleting memory...';
+        const response = await callMcpTool('delete_memory', {
+          id: testMemoryId,
+          hard_delete: false
+        });
+        result.className = 'success';
+        result.textContent = JSON.stringify(response, null, 2);
+      } catch (error) {
+        result.className = 'error';
+        result.textContent = 'Error: ' + error.message;
+      }
+    }
+
+    async function testMemoryStats() {
+      const result = document.getElementById('stats-result');
+      try {
+        result.textContent = 'Getting stats...';
+        const response = await callMcpTool('memory_stats');
+        result.className = 'success';
+        result.textContent = JSON.stringify(response, null, 2);
+      } catch (error) {
+        result.className = 'error';
+        result.textContent = 'Error: ' + error.message;
+      }
+    }
+  </script>
+</body>
+</html>
