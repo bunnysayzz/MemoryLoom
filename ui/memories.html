@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Memories - MemoryLoom</title>
+  <link rel="icon" type="image/png" href="/assets/memoryloom.png" />
+  <link rel="apple-touch-icon" href="/assets/memoryloom.png" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="backdrop">
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+    <div class="orb orb-c"></div>
+    <div class="grid-mask"></div>
+  </div>
+
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="/index.html" class="brand">
+          <img src="/assets/memoryloom.png" alt="MemoryLoom Logo" class="brand-logo" />
+          <h1>MemoryLoom</h1>
+        </a>
+      </div>
+      <nav class="nav-links">
+        <a href="/index.html" class="nav-link">
+          <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Dashboard
+        </a>
+        <a href="/memories.html" class="nav-link">
+          <svg class="nav-icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          Memories
+        </a>
+        <a href="/tools.html" class="nav-link">
+          <svg class="nav-icon" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+          API Tools
+        </a>
+        <a href="/settings.html" class="nav-link">
+          <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          Settings
+        </a>
+      </nav>
+      <div class="server-status-widget">
+        <div class="status-indicator">
+          <div id="global-health-dot" class="status-dot"></div>
+          <span id="global-health-text">Checking...</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="page-header">
+        <div class="page-title">
+          <h2>Memory Management</h2>
+          <p>Search, filter, and modify stored memories.</p>
+        </div>
+        <div class="header-actions">
+          <button id="add-memory-btn" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Add Memory
+          </button>
+        </div>
+      </div>
+
+      <div class="controls-bar">
+        <div class="search-wrapper">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="memory-search" class="form-control" placeholder="Search memories via semantic hybrid search..." />
+        </div>
+        <select id="filter-project" class="form-control" style="width: 150px;">
+          <option value="">All Projects</option>
+        </select>
+        <select id="filter-user" class="form-control" style="width: 150px;">
+          <option value="">All Users</option>
+        </select>
+        <button id="refresh-memories" class="btn btn-ghost" title="Refresh">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+        </button>
+      </div>
+
+      <div id="memory-list" class="memories-grid">
+        <div class="loading-spinner"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add/Edit Modal -->
+  <div id="memory-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="memory-modal-title">Add Memory</h3>
+        <button class="modal-close" id="close-memory-modal">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="memory-form">
+          <input type="hidden" id="memory-id" />
+          
+          <div class="input-group">
+            <label for="memory-content">Content *</label>
+            <textarea id="memory-content" class="form-control" rows="5" required placeholder="Enter the exact context, rule, or learning to remember..."></textarea>
+          </div>
+          
+          <div class="form-row">
+            <div class="input-group">
+              <label for="memory-importance">Importance (0.0 to 1.0)</label>
+              <input type="number" id="memory-importance" class="form-control" min="0" max="1" step="0.1" value="0.5" />
+            </div>
+            <div class="input-group">
+              <label for="memory-confidence">Confidence (0.0 to 1.0)</label>
+              <input type="number" id="memory-confidence" class="form-control" min="0" max="1" step="0.1" value="1.0" />
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="input-group">
+              <label for="memory-project">Project</label>
+              <input type="text" id="memory-project" class="form-control" placeholder="general" />
+            </div>
+            <div class="input-group">
+              <label for="memory-user">User</label>
+              <input type="text" id="memory-user" class="form-control" placeholder="default" />
+            </div>
+          </div>
+          
+          <div class="input-group">
+            <label for="memory-tags">Tags (comma-separated)</label>
+            <input type="text" id="memory-tags" class="form-control" placeholder="architecture, bug-fix, preference" />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" id="delete-memory" style="display: none; margin-right: auto;">Delete</button>
+        <button type="button" class="btn btn-ghost" id="cancel-memory">Cancel</button>
+        <button type="button" class="btn btn-primary" id="save-memory">Save Memory</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/layout.js"></script>
+  <script src="/memories.js"></script>
+</body>
+</html>

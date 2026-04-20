@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings & Setup - MemoryLoom</title>
+  <link rel="icon" type="image/png" href="/assets/memoryloom.png" />
+  <link rel="apple-touch-icon" href="/assets/memoryloom.png" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="backdrop">
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+    <div class="orb orb-c"></div>
+    <div class="grid-mask"></div>
+  </div>
+
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="/index.html" class="brand">
+          <img src="/assets/memoryloom.png" alt="MemoryLoom Logo" class="brand-logo" />
+          <h1>MemoryLoom</h1>
+        </a>
+      </div>
+      <nav class="nav-links">
+        <a href="/index.html" class="nav-link">
+          <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Dashboard
+        </a>
+        <a href="/memories.html" class="nav-link">
+          <svg class="nav-icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          Memories
+        </a>
+        <a href="/tools.html" class="nav-link">
+          <svg class="nav-icon" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+          API Tools
+        </a>
+        <a href="/settings.html" class="nav-link">
+          <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          Settings
+        </a>
+      </nav>
+      <div class="server-status-widget">
+        <div class="status-indicator">
+          <div id="global-health-dot" class="status-dot"></div>
+          <span id="global-health-text">Checking...</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="page-header">
+        <div class="page-title">
+          <h2>Settings & Configuration</h2>
+          <p>Manage your API keys and IDE MCP configurations.</p>
+        </div>
+      </div>
+
+      <div class="glass-panel">
+        <h3>API Key Management</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 20px;">Your API key is required to connect your editors to MemoryLoom.</p>
+        
+        <div class="api-key-box">
+          <span id="api-key-value">Loading...</span>
+          <button id="copy-api-key" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.85rem;">Copy</button>
+        </div>
+        
+        <button id="regenerate-key-btn" class="btn btn-danger">Regenerate Key</button>
+        <p style="font-size: 0.8rem; color: var(--accent-pink); margin-top: 10px;">Warning: Regenerating your key will break all existing IDE connections until you update them.</p>
+      </div>
+
+      <h3 style="margin-top: 40px; margin-bottom: 20px;">Connect Your Editor</h3>
+      <div class="settings-tabs">
+        <div class="tab-list">
+          <button class="tab-btn active" data-target="claude">Claude Desktop</button>
+          <button class="tab-btn" data-target="cursor">Cursor</button>
+          <button class="tab-btn" data-target="vscode">VS Code</button>
+          <button class="tab-btn" data-target="windsurf">Windsurf</button>
+          <button class="tab-btn" data-target="zed">Zed</button>
+          <button class="tab-btn" data-target="roocode">Roo Code</button>
+          <button class="tab-btn" data-target="cline">Cline</button>
+        </div>
+        <div class="tab-panels">
+          <div id="claude-panel" class="tab-panel active">
+            <h4>Claude Desktop Configuration</h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Add this to <code>~/Library/Application Support/Claude/claude_desktop_config.json</code>:</p>
+            <pre><button class="copy-btn">Copy</button><code id="claude-config">{
+  "mcpServers": {
+    "memoryloom": {
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
+      }
+    }
+  }
+}</code></pre>
+          </div>
+
+          <div id="cursor-panel" class="tab-panel">
+            <h4>Cursor Configuration</h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Add via Cursor Settings → Extensions → MCP:</p>
+            <pre><button class="copy-btn">Copy</button><code id="cursor-config">{
+  "mcpServers": {
+    "memoryloom": {
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
+      }
+    }
+  }
+}</code></pre>
+          </div>
+
+          <div id="vscode-panel" class="tab-panel">
+            <h4>VS Code Configuration</h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Add via VS Code Settings → Extensions → GitHub Copilot:</p>
+            <pre><button class="copy-btn">Copy</button><code id="vscode-config">{
+  "github.copilot.mcp.servers": {
+    "memoryloom": {
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
+      }
+    }
+  }
+}</code></pre>
+          </div>
+
+          <div id="windsurf-panel" class="tab-panel">
+            <h4>Windsurf Configuration</h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Add via Windsurf Settings → MCP Servers:</p>
+            <pre><button class="copy-btn">Copy</button><code id="windsurf-config">{
+  "mcpServers": {
+    "memoryloom": {
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
+      }
+    }
+  }
+}</code></pre>
+          </div>
+
+          <div id="zed-panel" class="tab-panel">
+            <h4>Zed Configuration</h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Add via Zed Settings → LSP → Add Server:</p>
+            <pre><button class="copy-btn">Copy</button><code id="zed-config">{
+  "mcpServers": {
+    "memoryloom": {
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
+      }
+    }
+  }
+}</code></pre>
+          </div>
+
+          <div id="roocode-panel" class="tab-panel">
+            <h4>Roo Code Configuration</h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Add via Roo Code Settings → MCP Servers:</p>
+            <pre><button class="copy-btn">Copy</button><code id="roocode-config">{
+  "mcpServers": {
+    "memoryloom": {
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
+      }
+    }
+  }
+}</code></pre>
+          </div>
+
+          <div id="cline-panel" class="tab-panel">
+            <h4>Cline Configuration</h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Add via VS Code Settings → Cline → MCP Servers:</p>
+            <pre><button class="copy-btn">Copy</button><code id="cline-config">{
+  "mcpServers": {
+    "memoryloom": {
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${MEMORYLOOM_API_KEY}"
+      }
+    }
+  }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/layout.js"></script>
+  <script src="/settings.js"></script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test MemoryLoom Render Deployment</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #0a0e10;
+      color: #f4f7f7;
+    }
+    h1 { color: #35d7bd; }
+    h2 { color: #50a8ff; margin-top: 30px; }
+    button {
+      background: #35d7bd;
+      color: #082226;
+      border: none;
+      padding: 12px 24px;
+      margin: 10px 5px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    button:hover { background: #2dd4bf; }
+    button:disabled { background: #555; cursor: not-allowed; }
+    pre {
+      background: #1a2428;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      border: 1px solid #35d7bd;
+    }
+    .success { color: #35d7bd; }
+    .error { color: #ff6b6b; }
+    .info { color: #50a8ff; }
+    .result { margin: 15px 0; }
+    .status { display: inline-block; padding: 4px 12px; border-radius: 4px; font-weight: 600; }
+    .status.success { background: rgba(53, 215, 189, 0.2); color: #35d7bd; }
+    .status.error { background: rgba(255, 107, 107, 0.2); color: #ff6b6b; }
+    .test-section { background: rgba(10, 26, 31, 0.8); padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid rgba(181, 218, 222, 0.22); }
+  </style>
+</head>
+<body>
+  <h1>🧪 MemoryLoom Render Deployment Test</h1>
+  
+  <div class="test-section">
+    <h2>Configuration</h2>
+    <p><strong>URL:</strong> <span class="info">https://memoryloom-6g1x.onrender.com</span></p>
+    <p><strong>API Key:</strong> <span class="info">hGmcDJNs4vl+HKn/afNoSUwzcpdOC2WueXqqWZtVUKA=</span></p>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 1: Health Check</h2>
+    <button onclick="testHealth()">Run Health Check</button>
+    <div id="health-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 2: Memory Stats</h2>
+    <button onclick="testMemoryStats()">Get Memory Stats</button>
+    <div id="stats-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 3: Add Memory</h2>
+    <button onclick="testAddMemory()">Add Test Memory</button>
+    <div id="add-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 4: List Memories</h2>
+    <button onclick="testListMemories()">List All Memories</button>
+    <div id="list-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 5: Search Memories</h2>
+    <button onclick="testSearchMemories()">Search Memories</button>
+    <div id="search-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 6: Update Memory</h2>
+    <button onclick="testUpdateMemory()">Update Memory</button>
+    <div id="update-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 7: Delete Memory</h2>
+    <button onclick="testDeleteMemory()">Delete Memory</button>
+    <div id="delete-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Quick Actions</h2>
+    <button onclick="runAllTests()">Run All Tests</button>
+    <button onclick="openUI()">Open MemoryLoom UI</button>
+  </div>
+
+  <script>
+    const API_URL = 'https://memoryloom-6g1x.onrender.com';
+    const API_KEY = 'hGmcDJNs4vl+HKn/afNoSUwzcpdOC2WueXqqWZtVUKA=';
+    let testMemoryId = null;
+
+    function showResult(elementId, status, message, data = null) {
+      const element = document.getElementById(elementId);
+      const statusClass = status === 'success' ? 'success' : 'error';
+      const statusBadge = `<span class="status ${statusClass}">${status.toUpperCase()}</span>`;
+      
+      let html = `${statusBadge} ${message}`;
+      if (data) {
+        html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+      }
+      element.innerHTML = html;
+    }
+
+    async function callMcpTool(toolName, args = {}) {
+      const response = await fetch(`${API_URL}/mcp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${API_KEY}`
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: Date.now(),
+          method: 'tools/call',
+          params: {
+            name: toolName,
+            arguments: args
+          }
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error.message || 'MCP tool call failed');
+      }
+      
+      if (data.result && data.result.content && data.result.content[0]) {
+        return JSON.parse(data.result.content[0].text);
+      }
+      
+      return data.result;
+    }
+
+    async function testHealth() {
+      try {
+        const response = await fetch(`${API_URL}/health`);
+        const data = await response.json();
+        showResult('health-result', 'success', 'Health check passed!', data);
+      } catch (error) {
+        showResult('health-result', 'error', `Health check failed: ${error.message}`);
+      }
+    }
+
+    async function testMemoryStats() {
+      try {
+        const result = await callMcpTool('memory_stats');
+        showResult('stats-result', 'success', 'Memory stats retrieved!', result);
+      } catch (error) {
+        showResult('stats-result', 'error', `Failed: ${error.message}`);
+      }
+    }
+
+    async function testAddMemory() {
+      try {
+        const result = await callMcpTool('add_memory', {
+          content: 'Test memory from Render deployment - ' + new Date().toISOString(),
+          importance: 0.8,
+          metadata: {
+            user: 'test-user',
+            project: 'render-test',
+            memory_type: 'test',
+            tags: ['test', 'render', 'deployment']
+          }
+        });
+        testMemoryId = result.memory.id;
+        showResult('add-result', 'success', `Memory added! ID: ${testMemoryId}`, result);
+      } catch (error) {
+        showResult('add-result', 'error', `Failed: ${error.message}`);
+      }
+    }
+
+    async function testListMemories() {
+      try {
+        const result = await callMcpTool('list_memories', {
+          limit: 10,
+          sort: 'updated_desc'
+        });
+        showResult('list-result', 'success', `Found ${result.count} memories!`, result);
+      } catch (error) {
+        showResult('list-result', 'error', `Failed: ${error.message}`);
+      }
+    }
+
+    async function testSearchMemories() {
+      try {
+        const result = await callMcpTool('search_memories', {
+          query: 'test render',
+          limit: 5
+        });
+        showResult('search-result', 'success', `Found ${result.count} matching memories!`, result);
+      } catch (error) {
+        showResult('search-result', 'error', `Failed: ${error.message}`);
+      }
+    }
+
+    async function testUpdateMemory() {
+      if (!testMemoryId) {
+        showResult('update-result', 'error', 'Please add a memory first!');
+        return;
+      }
+      try {
+        const result = await callMcpTool('update_memory', {
+          id: testMemoryId,
+          content: 'Updated test memory - ' + new Date().toISOString(),
+          importance: 0.9
+        });
+        showResult('update-result', 'success', 'Memory updated!', result);
+      } catch (error) {
+        showResult('update-result', 'error', `Failed: ${error.message}`);
+      }
+    }
+
+    async function testDeleteMemory() {
+      if (!testMemoryId) {
+        showResult('delete-result', 'error', 'Please add a memory first!');
+        return;
+      }
+      try {
+        const result = await callMcpTool('delete_memory', {
+          id: testMemoryId,
+          hard_delete: true
+        });
+        showResult('delete-result', 'success', 'Memory deleted!', result);
+        testMemoryId = null;
+      } catch (error) {
+        showResult('delete-result', 'error', `Failed: ${error.message}`);
+      }
+    }
+
+    async function runAllTests() {
+      await testHealth();
+      await new Promise(r => setTimeout(r, 500));
+      await testMemoryStats();
+      await new Promise(r => setTimeout(r, 500));
+      await testAddMemory();
+      await new Promise(r => setTimeout(r, 500));
+      await testListMemories();
+      await new Promise(r => setTimeout(r, 500));
+      await testSearchMemories();
+      await new Promise(r => setTimeout(r, 500));
+      await testUpdateMemory();
+      await new Promise(r => setTimeout(r, 500));
+      await testDeleteMemory();
+    }
+
+    function openUI() {
+      window.open(API_URL, '_blank');
+    }
+
+    // Auto-run health check on load
+    window.addEventListener('load', () => {
+      testHealth();
+    });
+  </script>
+</body>
+</html>

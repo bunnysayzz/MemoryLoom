@@ -19,9 +19,19 @@ const API_KEY_FILE = ".api_key";
 const UI_ASSETS = {
   "/": { file: "index.html", contentType: "text/html; charset=utf-8" },
   "/index.html": { file: "index.html", contentType: "text/html; charset=utf-8" },
+  "/memories.html": { file: "memories.html", contentType: "text/html; charset=utf-8" },
+  "/settings.html": { file: "settings.html", contentType: "text/html; charset=utf-8" },
+  "/tools.html": { file: "tools.html", contentType: "text/html; charset=utf-8" },
   "/styles.css": { file: "styles.css", contentType: "text/css; charset=utf-8" },
+  "/layout.js": { file: "layout.js", contentType: "application/javascript; charset=utf-8" },
+  "/dashboard.js": { file: "dashboard.js", contentType: "application/javascript; charset=utf-8" },
+  "/memories.js": { file: "memories.js", contentType: "application/javascript; charset=utf-8" },
+  "/settings.js": { file: "settings.js", contentType: "application/javascript; charset=utf-8" },
   "/app.js": { file: "app.js", contentType: "application/javascript; charset=utf-8" },
-  "/assets/memoryloom.png": { file: "assets/memoryloom.png", contentType: "image/png" }
+  "/assets/memoryloom.png": { file: "assets/memoryloom.png", contentType: "image/png" },
+  "/test-memory-ui.html": { file: "test-memory-ui.html", contentType: "text/html; charset=utf-8" },
+  "/test-render-deployment.html": { file: "test-render-deployment.html", contentType: "text/html; charset=utf-8" },
+  "/verify-deployment.js": { file: "verify-deployment.js", contentType: "application/javascript; charset=utf-8" }
 };
 
 const VALID_LOG_LEVELS = new Set(["debug", "info", "warn", "error"]);
@@ -326,10 +336,9 @@ function scoreMemory(memory, query) {
   const semanticScore = Math.max(0, cosineSimilarity(memory.embedding, queryEmbedding));
   const importanceBoost = memory.importance * 0.2;
   const confidenceBoost = Number(memory.metadata?.confidence || 0) * 0.1;
-  const archivedPenalty = memory.metadata?.archived ? -0.5 : 0;
-  return Number(
-    (tokenScore * 0.45 + semanticScore * 0.35 + importanceBoost + confidenceBoost + archivedPenalty).toFixed(3)
-  );
+  const scoreRaw = tokenScore * 0.45 + semanticScore * 0.35 + importanceBoost + confidenceBoost;
+  const archivedMultiplier = memory.metadata?.archived ? 0.8 : 1.0;
+  return Number((scoreRaw * archivedMultiplier).toFixed(3));
 }
 
 function matchesFilters(memory, filters = {}) {
@@ -505,6 +514,7 @@ async function replaceMemories(memories) {
 }
 
 async function writeAndRespond(memories, payload) {
+  // Keeping this for backwards compatibility where replaceAll is absolutely needed
   await replaceMemories(memories);
   writeLog("info", "memory_store_updated", {
     totalMemories: memories.length,
@@ -533,7 +543,6 @@ async function migrateMemories() {
 }
 
 async function addMemory(args) {
-  const memories = await loadMemories();
   const entry = {
     id: randomUUID(),
     content: args.content,
@@ -542,8 +551,15 @@ async function addMemory(args) {
     metadata: args.metadata
   };
 
-  memories.push(entry);
-  return writeAndRespond(memories, {
+  await store.add(entry);
+  
+  writeLog("info", "memory_store_updated", {
+    action: "add",
+    memoryId: entry.id,
+    storageMode: CONFIG.storageMode
+  });
+
+  return buildTextResult({
     ok: true,
     message: "Memory stored successfully.",
     memory: entry
@@ -578,8 +594,15 @@ async function upsertMemory(args) {
       )
     };
     updated.embedding = generateEmbedding(buildSearchText(updated));
-    memories[existingIndex] = updated;
-    return writeAndRespond(memories, {
+    await store.update(updated);
+    
+    writeLog("info", "memory_store_updated", {
+      action: "update",
+      memoryId: updated.id,
+      storageMode: CONFIG.storageMode
+    });
+
+    return buildTextResult({
       ok: true,
       action: "updated",
       memory: updated
@@ -596,8 +619,15 @@ async function upsertMemory(args) {
       conflict_key: targetKey
     }
   };
-  memories.push(entry);
-  return writeAndRespond(memories, {
+  await store.add(entry);
+  
+  writeLog("info", "memory_store_updated", {
+    action: "add",
+    memoryId: entry.id,
+    storageMode: CONFIG.storageMode
+  });
+
+  return buildTextResult({
     ok: true,
     action: "created",
     memory: entry
@@ -670,9 +700,10 @@ async function getMemories(args) {
   const idSet = new Set(ids);
   const memories = await loadMemories();
   const found = memories.filter((memory) => idSet.has(memory.id)).map((memory) => touchMemory(memory));
-  const touchedMap = new Map(found.map((memory) => [memory.id, memory]));
-  const updated = memories.map((memory) => touchedMap.get(memory.id) || memory);
-  await replaceMemories(updated);
+  
+  for (const memory of found) {
+    await store.update(memory);
+  }
 
   return buildTextResult({
     ok: true,
@@ -710,8 +741,15 @@ async function updateMemory(args) {
   };
   updated.embedding = generateEmbedding(buildSearchText(updated));
 
-  memories[index] = updated;
-  return writeAndRespond(memories, {
+  await store.update(updated);
+
+  writeLog("info", "memory_store_updated", {
+    action: "update",
+    memoryId: updated.id,
+    storageMode: CONFIG.storageMode
+  });
+
+  return buildTextResult({
     ok: true,
     message: "Memory updated successfully.",
     memory: updated
@@ -728,8 +766,16 @@ async function deleteMemory(args) {
   }
 
   if (hardDelete) {
-    const [deleted] = memories.splice(index, 1);
-    return writeAndRespond(memories, {
+    const deleted = memories[index];
+    await store.delete(id);
+
+    writeLog("info", "memory_store_updated", {
+      action: "delete",
+      memoryId: id,
+      storageMode: CONFIG.storageMode
+    });
+
+    return buildTextResult({
       ok: true,
       message: "Memory deleted permanently.",
       memory: deleted
@@ -741,8 +787,16 @@ async function deleteMemory(args) {
     metadata: normalizeMetadata({ archived: true }, memories[index].metadata)
   };
   archived.embedding = generateEmbedding(buildSearchText(archived));
-  memories[index] = archived;
-  return writeAndRespond(memories, {
+  
+  await store.update(archived);
+
+  writeLog("info", "memory_store_updated", {
+    action: "archive",
+    memoryId: archived.id,
+    storageMode: CONFIG.storageMode
+  });
+
+  return buildTextResult({
     ok: true,
     message: "Memory archived successfully.",
     memory: archived
@@ -824,25 +878,31 @@ async function consolidateMemories(args) {
   };
   consolidatedMemory.embedding = generateEmbedding(buildSearchText(consolidatedMemory));
 
-  const candidateIds = new Set(candidates.map((memory) => memory.id));
-  const updatedMemories = memories.map((memory) => {
-    if (!candidateIds.has(memory.id) || !archiveOriginals) {
-      return memory;
+  if (archiveOriginals) {
+    for (const memory of candidates) {
+      const archived = {
+        ...memory,
+        metadata: normalizeMetadata(
+          {
+            archived: true,
+            source: "consolidated"
+          },
+          memory.metadata
+        )
+      };
+      await store.update(archived);
     }
-    return {
-      ...memory,
-      metadata: normalizeMetadata(
-        {
-          archived: true,
-          source: "consolidated"
-        },
-        memory.metadata
-      )
-    };
-  });
-  updatedMemories.push(consolidatedMemory);
+  }
+  
+  await store.add(consolidatedMemory);
 
-  return writeAndRespond(updatedMemories, {
+  writeLog("info", "memory_store_updated", {
+    action: "consolidate",
+    consolidatedId: consolidatedMemory.id,
+    storageMode: CONFIG.storageMode
+  });
+
+  return buildTextResult({
     ok: true,
     consolidated: true,
     consolidated_memory_id: consolidatedMemory.id,

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard - MemoryLoom</title>
+  <title>API Tools - MemoryLoom</title>
   <link rel="icon" type="image/png" href="/assets/memoryloom.png" />
   <link rel="apple-touch-icon" href="/assets/memoryloom.png" />
   <link rel="stylesheet" href="/styles.css" />
@@ -55,58 +55,56 @@
     <main class="main-content">
       <div class="page-header">
         <div class="page-title">
-          <h2>Dashboard</h2>
-          <p>Overview of your persistent AI memories.</p>
-        </div>
-        <div class="header-actions">
-          <a href="/memories.html" class="btn btn-primary">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            Add Memory
-          </a>
+          <h2>MCP Tools Reference</h2>
+          <p>These are the tools exposed by MemoryLoom to your IDEs.</p>
         </div>
       </div>
 
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-label">Total Memories</div>
-          <div class="stat-value" id="stat-total">-</div>
+      <div class="tools-grid">
+        <div class="tool-card">
+          <h3>add_memory</h3>
+          <p>Store new memory with metadata and importance</p>
+          <pre><code>{"content": "User prefers TypeScript", "importance": 0.9}</code></pre>
         </div>
-        <div class="stat-card">
-          <div class="stat-label">Active</div>
-          <div class="stat-value" id="stat-active">-</div>
+        <div class="tool-card">
+          <h3>search_memories</h3>
+          <p>Find relevant memories using hybrid search</p>
+          <pre><code>{"query": "programming preferences", "limit": 5}</code></pre>
         </div>
-        <div class="stat-card">
-          <div class="stat-label">Archived</div>
-          <div class="stat-value" id="stat-archived">-</div>
+        <div class="tool-card">
+          <h3>get_memories</h3>
+          <p>Retrieve specific memories by ID</p>
+          <pre><code>{"ids": ["memory-id-1", "memory-id-2"]}</code></pre>
         </div>
-        <div class="stat-card">
-          <div class="stat-label">Storage Mode</div>
-          <div class="stat-value" id="stat-storage" style="font-size: 1.8rem; color: var(--accent-purple);">-</div>
+        <div class="tool-card">
+          <h3>update_memory</h3>
+          <p>Modify existing memory content or metadata</p>
+          <pre><code>{"id": "memory-id", "content": "Updated content"}</code></pre>
         </div>
-      </div>
-
-      <div class="glass-panel">
-        <h3>System Diagnostics</h3>
-        <p style="color: var(--text-secondary); margin-bottom: 20px;">Current MemoryLoom API connection health.</p>
-        <div class="health-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-          <div style="padding: 16px; background: rgba(0,0,0,0.3); border-radius: 8px;">
-            <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px;">/health</div>
-            <a href="/health" target="_blank" style="color: var(--accent-green); text-decoration: none; font-weight: 500;">Operational</a>
-          </div>
-          <div style="padding: 16px; background: rgba(0,0,0,0.3); border-radius: 8px;">
-            <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px;">/mcp</div>
-            <a href="/mcp" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-weight: 500;">Operational</a>
-          </div>
-          <div style="padding: 16px; background: rgba(0,0,0,0.3); border-radius: 8px;">
-            <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px;">/api/setup-info</div>
-            <a href="/settings.html" style="color: var(--accent-purple); text-decoration: none; font-weight: 500;">Operational</a>
-          </div>
+        <div class="tool-card">
+          <h3>delete_memory</h3>
+          <p>Archive or permanently delete memories</p>
+          <pre><code>{"id": "memory-id", "hard_delete": false}</code></pre>
+        </div>
+        <div class="tool-card">
+          <h3>upsert_memory</h3>
+          <p>Create or update memory by conflict key</p>
+          <pre><code>{"content": "New or updated memory"}</code></pre>
+        </div>
+        <div class="tool-card">
+          <h3>consolidate_memories</h3>
+          <p>Merge similar memories into summaries</p>
+          <pre><code>{"minimum_count": 3, "archive_originals": true}</code></pre>
+        </div>
+        <div class="tool-card">
+          <h3>list_memories</h3>
+          <p>List memories with optional filters</p>
+          <pre><code>{"filters": {"user": "example"}}</code></pre>
         </div>
       </div>
     </main>
   </div>
 
   <script src="/layout.js"></script>
-  <script src="/dashboard.js"></script>
 </body>
 </html>
