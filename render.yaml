@@ -4,6 +4,7 @@ services:
     runtime: docker
     plan: free
     dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
     envVars:
       - key: MEMORYLOOM_STORAGE_MODE
         value: json
@@ -15,5 +16,7 @@ services:
         value: "true"
       - key: MEMORYLOOM_BACKUP_RETENTION
         value: "10"
-      - key: MEMORYLOOM_HEALTH_PORT
-        value: "8080"
+      - key: MEMORYLOOM_WEB_UI
+        value: "true"
+      - key: MEMORYLOOM_API_KEY
+        generateValue: true

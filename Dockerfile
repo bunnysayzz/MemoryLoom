@@ -14,10 +14,12 @@ COPY start.sh ./
 ENV MEMORYLOOM_STORAGE_MODE=json
 ENV MEMORYLOOM_DATA_DIR=/app/data
 ENV MEMORYLOOM_LOG_LEVEL=info
+ENV MEMORYLOOM_WEB_UI=true
 
 RUN mkdir -p /app/data
 RUN chmod +x start.sh
 
-EXPOSE 8080 10000
+# Render uses PORT environment variable
+EXPOSE 10000
 
 CMD ["./start.sh"]
