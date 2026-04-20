@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Handle snippet copy buttons
   document.querySelectorAll('.copy-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
-      const codeBlock = e.target.nextElementSibling;
+      const codeBlock = e.target.closest('.code-block-container').querySelector('code');
       navigator.clipboard.writeText(codeBlock.textContent);
       
       const originalText = btn.textContent;
